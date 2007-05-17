@@ -1,0 +1,19 @@
+.cvsignore
+Build.PL
+Changes
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/MakeMaker.pm
+inc/Module/Install/Metadata.pm
+lib/MooseX/Daemonize.pm
+Makefile.PL
+MANIFEST
+META.yml			# Will be created by "make dist"
+README
+t/00.load.t
+t/01.filecreate.t
+t/kwalitee.t
+t/perlcritic.t
+t/pod-coverage.t
+t/pod.t
