@@ -1,144 +1,45 @@
-package MooseX::Daemonize;
-use strict; # because Kwalitee is pedantic
-use Moose::Role;
-
-our $VERSION = 0.01;
-use Carp;
+package Test::MooseX::Daemonize;
+use strict;
+use Test::More;
 use Proc::Daemon;
-use File::Flock;
-use File::Slurp;
 
-with qw(MooseX::Getopt);
+# BEGIN CARGO CULTING
+use Sub::Exporter;
+use Test::Builder;
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:PERIGRIN';
 
-has progname => (
-    isa     => 'Str',
-    is      => 'ro',
-    default => sub { lc $_[0]->meta->name },
-);
+my @exports = qw[
+    daemonize_ok
+];
 
-has pidbase => (
-    isa      => 'Str',
-    is       => 'ro',
-    lazy     => 1,
-    required => 1,
-    default  => sub { return '/var/run' },
-);
+Sub::Exporter::setup_exporter({
+    exports => \@exports,
+    groups  => { default => \@exports }
+});
 
-has pidfile => (
-    isa      => 'Str',
-    is       => 'ro',
-    lazy     => 1,
-    required => 1,
-    default  => sub { $_[0]->pidbase .'/'. $_[0]->progname . '.pid' },
-);
+our $Test = Test::Builder->new;
 
-has foreground => (
-    metaclass   => 'Getopt',
-    cmd_aliases => ['f'],
-    isa         => 'Bool',
-    is          => 'ro',
-    default     => sub { 0 },
-);
-
-sub check {
-    my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    if ( -e $pidfile ) {
-        my $prog = $self->progname;
-        chomp( my $pid = read_file($pidfile) );
-        unless ( kill 0 => $pid or $!{EPERM} ) {
-            carp "$prog already running ($pid).";
-        }
-        else {
-            carp "$prog not running but $pidfile exists. Perhaps it is stale?";
-        }
-        return 1;
+sub daemonize_ok {
+    my ( $daemon, $msg ) = @_;
+    unless ( my $pid = Proc::Daemon::Fork ) {
+        $daemon->start();
+        exit;
     }
-    return 0;
-}
-
-sub start {
-    my ($self) = @_;
-    return if $self->check;
-
-    $self->daemonize unless $self->foreground;
-
-    my $pidfile = $self->pidfile;
-    lock( $pidfile, undef, 'nonblocking' )
-      or croak "Could not lock PID file $pidfile: $!";
-    write_file( $pidfile, "$$\n" );
-
-    $self->setup_signals;
-    return;
-}
-
-sub stop {
-    my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    unless ( -e $pidfile ) {
-        croak $self->progname . 'is not currently running.';
+    else {
+        sleep(5);    # Punt on sleep time, 5 seconds should be enough        
+        $Test->ok( kill 0 => $pid or $!{EPERM}, $msg );
+        return $pid;
     }
-    lock( $pidfile, undef, 'nonblocking' )
-      or croak "Could not lock PID file $pidfile: $!";
-    chomp( my $pid = read_file($pidfile) );
-    $self->kill($pid);
-    unlink($pidfile);
-    return;
-}
-
-sub restart {
-    my ($self) = @_;
-    $self->stop();
-    $self->start();
-}
-
-sub daemonize {
-    my ($self) = @_;
-    Proc::Daemon::Init;
-}
-
-sub setup_signals {
-    my $self = @_;
-    $SIG{INT} = sub { $_[0]->handle_sigint; };
-    $SIG{HUP} = sub { $_[0]->handle_sighup };
-}
-
-sub handle_sigint { $_[0]->stop; }
-sub handle_sighup { return; }
-
-sub kill {
-    my ( $self, $pid ) = @_;
-    unless ( kill 0 => $pid or $!{EPERM} ) {
-        carp "$pid appears dead.";
-        return;
-    }
-
-    kill( 2, $pid );    # Try SIGINT
-    sleep(1) if kill( 0, $pid );
-
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        kill( 15, $pid );                       # try SIGTERM
-        sleep(1) if kill( 0, $pid );
-    }
-
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        kill( 9, $pid );                        # finally try SIGKILL
-        sleep(1) if kill( 0, $pid );
-    }
-
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        carp "$pid doesn't seem to want to die.";    # AHH EVIL DEAD!
-    }
-
-    return;
 }
 
 1;
 __END__
 
+
 =head1 NAME
 
-MooseX::Daemonize - provides a Role that daemonizes your Moose based application.
+Test::MooseX::Daemonize - provides a Role that daemonizes your Moose based application.
 
 
 =head1 VERSION
@@ -147,26 +48,21 @@ This document describes MooseX::Daemonize version 0.0.1
 
 
 =head1 SYNOPSIS
-
-    package FileMaker;
-    use Moose;
-    with qw(MooseX::Daemonize);
-
-    sub create_file {
-        my ( $self, $file ) = @_;
-        open( FILE, ">$file" ) || die;
-        close(FILE);
-    }
-
-    no Moose;
-
-    # then in the main package ... 
     
-    my $daemon = FileMaker->new();
-    $daemon->start();
-    $daemon->create_file($file);
-    $daemon->stop();
-     
+    package main;
+    use Cwd;
+
+    ## Try to make sure we are in the test directory
+    chdir 't' if ( Cwd::cwd() !~ m|/t$| );
+    my $cwd = Cwd::cwd();
+
+    my $file = join( '/', $cwd, 'im_alive' );
+    my $daemon = FileMaker->new( pidbase => '.', filename => $file );
+
+    daemonize_ok( $daemon, 'child forked okay' );
+    ok( -e $file, "$file exists" );
+    unlink($file);
+
 =head1 DESCRIPTION
 
 Often you want to write a persistant daemon that has a pid file, and responds appropriately to Signals. 
