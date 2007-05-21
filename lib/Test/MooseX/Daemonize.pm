@@ -1,6 +1,6 @@
-package Test::MooseX::Daemonize;
 use strict;
-use Test::More;
+
+package Test::MooseX::Daemonize;
 use Proc::Daemon;
 
 # BEGIN CARGO CULTING
@@ -28,10 +28,35 @@ sub daemonize_ok {
     }
     else {
         sleep(5);    # Punt on sleep time, 5 seconds should be enough        
-        $Test->ok( kill 0 => $pid or $!{EPERM}, $msg );
+        $Test->ok( kill(0 => $pid or $!{EPERM}), $msg );
         return $pid;
     }
 }
+
+package Test::MooseX::Daemonize::Testable;
+use Moose::Role;
+
+has test_output => (
+    isa => 'Str',
+    is  => 'ro',    
+    required => 1,
+);
+
+after daemonize => sub {
+    $Test->use_numbers(0);
+    $Test->no_ending(1);
+    open my $stdout_out, '>', $_[0]->test_output;
+    my $fileno = fileno $stdout_out;
+    open STDERR, ">&=$fileno"
+      or die "Can't redirect STDERR";
+
+    open STDOUT, ">&=$fileno"
+      or die "Can't redirect STDOUT";
+
+    $Test->output($stdout_out);
+    $Test->failure_output($stdout_out);
+    $Test->todo_output($stdout_out);
+};
 
 1;
 __END__
