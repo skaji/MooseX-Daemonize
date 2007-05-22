@@ -1,19 +1,25 @@
 package MooseX::Daemonize;
-use strict; # because Kwalitee is pedantic
+use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
 our $VERSION = 0.01;
 use Carp;
 use Proc::Daemon;
+
 use File::Flock;
 use File::Slurp;
 
 with qw(MooseX::Getopt);
 
 has progname => (
-    isa     => 'Str',
-    is      => 'ro',
-    default => sub { lc $_[0]->meta->name },
+    isa      => 'Str',
+    is       => 'ro',
+    lazy     => 1,
+    required => 1,
+    default  => sub {
+        ( my $name = lc $_[0]->meta->name ) =~ s/::/_/g;
+        return $name;
+    },
 );
 
 has pidbase => (
@@ -29,7 +35,7 @@ has pidfile => (
     is       => 'ro',
     lazy     => 1,
     required => 1,
-    default  => sub { $_[0]->pidbase .'/'. $_[0]->progname . '.pid' },
+    default  => sub { $_[0]->pidbase . '/' . $_[0]->progname . '.pid' },
 );
 
 has foreground => (
@@ -46,15 +52,18 @@ sub check {
     if ( -e $pidfile ) {
         my $prog = $self->progname;
         chomp( my $pid = read_file($pidfile) );
-        unless ( kill 0 => $pid or $!{EPERM} ) {
-            carp "$prog already running ($pid).";
+        if ( kill 0 => $pid ) {
+            croak "$prog already running ($pid).";
         }
-        else {
-            carp "$prog not running but $pidfile exists. Perhaps it is stale?";
-        }
+        carp "$prog not running but $pidfile exists. Perhaps it is stale?";
         return 1;
     }
     return 0;
+}
+
+sub daemonize {
+    my ($self) = @_;
+    Proc::Daemon::Init;
 }
 
 sub start {
@@ -67,7 +76,7 @@ sub start {
     lock( $pidfile, undef, 'nonblocking' )
       or croak "Could not lock PID file $pidfile: $!";
     write_file( $pidfile, "$$\n" );
-
+    unlock($pidfile);
     $self->setup_signals;
     return;
 }
@@ -76,13 +85,15 @@ sub stop {
     my ($self) = @_;
     my $pidfile = $self->pidfile;
     unless ( -e $pidfile ) {
-        croak $self->progname . 'is not currently running.';
+        carp $self->progname . ' is not currently running.';
+        return;
     }
+    chomp( my $pid = read_file($pidfile) );
+    $self->kill($pid) unless $self->foreground();
     lock( $pidfile, undef, 'nonblocking' )
       or croak "Could not lock PID file $pidfile: $!";
-    chomp( my $pid = read_file($pidfile) );
-    $self->kill($pid);
     unlink($pidfile);
+    unlock($pidfile);
     return;
 }
 
@@ -90,11 +101,6 @@ sub restart {
     my ($self) = @_;
     $self->stop();
     $self->start();
-}
-
-sub daemonize {
-    my ($self) = @_;
-    Proc::Daemon::Init;
 }
 
 sub setup_signals {
@@ -108,8 +114,8 @@ sub handle_sighup { return; }
 
 sub kill {
     my ( $self, $pid ) = @_;
-    unless ( kill 0 => $pid or $!{EPERM} ) {
-        carp "$pid appears dead.";
+    unless ( kill 0 => $pid ) {
+        carp "$pid already appears dead.";
         return;
     }
 
