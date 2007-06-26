@@ -35,7 +35,10 @@ has pidfile => (
     is       => 'ro',
     lazy     => 1,
     required => 1,
-    default  => sub { $_[0]->pidbase . '/' . $_[0]->progname . '.pid' },
+    default  => sub {
+        die 'Cannot write to ' . $_[0]->pidbase unless -w $_[0]->pidbase;
+        $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
+    },
 );
 
 has foreground => (
@@ -48,14 +51,12 @@ has foreground => (
 
 sub check {
     my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    if ( -e $pidfile ) {
+    if ( my $pid = $self->get_pid ) {
         my $prog = $self->progname;
-        chomp( my $pid = read_file($pidfile) );
-        if ( kill 0 => $pid ) {
+        if ( CORE::kill 0 => $pid ) {
             croak "$prog already running ($pid).";
         }
-        carp "$prog not running but $pidfile exists. Perhaps it is stale?";
+        carp "$prog not running but $pid exists. Perhaps it is stale?";
         return 1;
     }
     return 0;
@@ -72,24 +73,28 @@ sub start {
 
     $self->daemonize unless $self->foreground;
 
+    # Avoid 'stdin reopened for output' warning with newer perls
+    open( NULL, '/dev/null' );
+    <NULL> if (0);
+
+    $self->save_pid;
+    $self->setup_signals;
+    return $$;
+}
+
+sub save_pid {
+    my ($self) = @_;
     my $pidfile = $self->pidfile;
     lock( $pidfile, undef, 'nonblocking' )
       or croak "Could not lock PID file $pidfile: $!";
     write_file( $pidfile, "$$\n" );
     unlock($pidfile);
-    $self->setup_signals;
     return;
 }
 
-sub stop {
+sub remove_pid {
     my ($self) = @_;
     my $pidfile = $self->pidfile;
-    unless ( -e $pidfile ) {
-        carp $self->progname . ' is not currently running.';
-        return;
-    }
-    chomp( my $pid = read_file($pidfile) );
-    $self->kill($pid) unless $self->foreground();
     lock( $pidfile, undef, 'nonblocking' )
       or croak "Could not lock PID file $pidfile: $!";
     unlink($pidfile);
@@ -97,43 +102,67 @@ sub stop {
     return;
 }
 
+sub get_pid {
+    my ($self) = @_;
+    my $pidfile = $self->pidfile;
+    return unless -e $pidfile;
+    chomp( my $pid = read_file($pidfile) );
+    return $pid;
+}
+
+sub stop {
+    my ( $self, %args ) = @_;
+    my $pid = $self->get_pid;
+    $self->kill($pid) unless $self->foreground();
+    $self->remove_pid;
+    return 1 if $args{no_exit};
+    exit;
+}
+
 sub restart {
     my ($self) = @_;
-    $self->stop();
+    $self->stop( noexit => 1 );
     $self->start();
 }
 
 sub setup_signals {
-    my $self = @_;
-    $SIG{INT} = sub { $_[0]->handle_sigint; };
-    $SIG{HUP} = sub { $_[0]->handle_sighup };
+    my ($self) = @_;
+    $SIG{INT} = sub { $self->handle_sigint; };
+    $SIG{HUP} = sub { $self->handle_sighup };
 }
 
-sub handle_sigint { $_[0]->stop; }
+sub handle_sigint { $_[0]->stop }
 sub handle_sighup { return; }
 
 sub kill {
     my ( $self, $pid ) = @_;
-    unless ( kill 0 => $pid ) {
-        carp "$pid already appears dead.";
+    unless ( CORE::kill 0 => $pid ) {
+
+        # warn "$pid already appears dead.";
         return;
     }
 
-    kill( 2, $pid );    # Try SIGINT
-    sleep(1) if kill( 0, $pid );
+    if ( $pid eq $$ ) {
 
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        kill( 15, $pid );                       # try SIGTERM
-        sleep(1) if kill( 0, $pid );
+        # warn "$pid is us! Can't commit suicied.";
+        return;
     }
 
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        kill( 9, $pid );                        # finally try SIGKILL
-        sleep(1) if kill( 0, $pid );
+    CORE::kill( 2, $pid );    # Try SIGINT
+    sleep(1) if CORE::kill( 0, $pid );
+
+    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
+        CORE::kill( 15, $pid );                       # try SIGTERM
+        sleep(1) if CORE::kill( 0, $pid );
     }
 
-    unless ( kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        carp "$pid doesn't seem to want to die.";    # AHH EVIL DEAD!
+    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
+        CORE::kill( 9, $pid );                        # finally try SIGKILL
+        sleep(1) if CORE::kill( 0, $pid );
+    }
+
+    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
+        carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
     }
 
     return;
@@ -242,6 +271,12 @@ Handle a INT signal, by default calls C<$self->stop()>;
 =item handle_sighup()
 
 Handle a HUP signal. Nothing is done by default.
+
+=item get_pid
+
+=item save_pid
+
+=item remove_pid
 
 =item meta()
 

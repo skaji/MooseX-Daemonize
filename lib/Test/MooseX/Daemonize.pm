@@ -2,6 +2,7 @@ use strict;
 
 package Test::MooseX::Daemonize;
 use Proc::Daemon;
+use File::Slurp;
 
 # BEGIN CARGO CULTING
 use Sub::Exporter;
@@ -10,13 +11,16 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
 my @exports = qw[
-    daemonize_ok
+  daemonize_ok
+  check_test_output
 ];
 
-Sub::Exporter::setup_exporter({
-    exports => \@exports,
-    groups  => { default => \@exports }
-});
+Sub::Exporter::setup_exporter(
+    {
+        exports => \@exports,
+        groups  => { default => \@exports }
+    }
+);
 
 our $Test = Test::Builder->new;
 
@@ -27,9 +31,35 @@ sub daemonize_ok {
         exit;
     }
     else {
-        sleep(5);    # Punt on sleep time, 5 seconds should be enough        
-        $Test->ok( kill(0 => $pid or $!{EPERM}), $msg );
-        return $pid;
+        sleep(1);    # Punt on sleep time, 1 seconds should be enough
+        $Test->ok( -e $daemon->pidfile, $msg )
+          || $Test->diag( 'Pidfile (' . $daemon->pidfile . ') not found.' );
+    }
+}
+
+sub check_test_output {
+    my ($app) = @_;
+    open( my $stdout_in, '<', $app->test_output )
+      or die "can't open test output: $!";
+    while ( my $line = <$stdout_in> ) {
+        $line =~ s/\s+\z//;
+        my $label;
+        if ( $line =~ /\A((not\s+)?ok)(?:\s+-)(?:\s+(.*))\z/ ) {
+            my ( $status, $not, $text ) = ( $1, $2, $3 );
+            $text ||= '';
+
+           # We don't just call ok(!$not), because that generates diagnostics of
+           # its own for failures. We only want the diagnostics from the child.
+            my $num = $Test->current_test;
+            $Test->current_test( ++$num );
+            $Test->_print("$status $num - $text\n");
+        }
+        elsif ( $line =~ s/\A#\s?// ) {
+            $Test->diag($line);
+        }
+        else {
+            $Test->_print_diag("$label: $line (unrecognised)\n");
+        }
     }
 }
 
@@ -37,25 +67,25 @@ package Test::MooseX::Daemonize::Testable;
 use Moose::Role;
 
 has test_output => (
-    isa => 'Str',
-    is  => 'ro',    
+    isa      => 'Str',
+    is       => 'ro',
     required => 1,
 );
 
 after daemonize => sub {
     $Test->use_numbers(0);
     $Test->no_ending(1);
-    open my $stdout_out, '>', $_[0]->test_output;
-    my $fileno = fileno $stdout_out;
-    open STDERR, ">&=$fileno"
+    open my $out, '>', $_[0]->test_output or die "Cannot open test output: $!";
+    my $fileno = fileno $out;
+    open STDERR, ">&=", $fileno
       or die "Can't redirect STDERR";
 
-    open STDOUT, ">&=$fileno"
+    open STDOUT, ">&=", $fileno
       or die "Can't redirect STDOUT";
 
-    $Test->output($stdout_out);
-    $Test->failure_output($stdout_out);
-    $Test->todo_output($stdout_out);
+    $Test->output($out);
+    $Test->failure_output($out);
+    $Test->todo_output($out);
 };
 
 1;
@@ -161,6 +191,10 @@ Handle a HUP signal. Nothing is done by default.
 =item meta()
 
 the C<meta()> method from L<Class::MOP::Class>
+
+=item daemonize_ok()
+
+=item check_test_output()
 
 =back
 
