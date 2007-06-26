@@ -23,11 +23,12 @@ has progname => (
 );
 
 has pidbase => (
-    isa      => 'Str',
-    is       => 'ro',
-    lazy     => 1,
-    required => 1,
-    default  => sub { return '/var/run' },
+    isa => 'Str',
+    is  => 'ro',
+
+    #    required => 1,
+    lazy    => 1,
+    default => sub { return '/var/run' },
 );
 
 has pidfile => (
@@ -131,11 +132,12 @@ sub setup_signals {
     $SIG{HUP} = sub { $self->handle_sighup };
 }
 
-sub handle_sigint { $_[0]->stop }
-sub handle_sighup { return; }
+sub handle_sigint { $_[0]->stop; }
+sub handle_sighup { $_[0]->restart; }
 
 sub kill {
     my ( $self, $pid ) = @_;
+    return unless $pid;
     unless ( CORE::kill 0 => $pid ) {
 
         # warn "$pid already appears dead.";
@@ -149,16 +151,16 @@ sub kill {
     }
 
     CORE::kill( 2, $pid );    # Try SIGINT
-    sleep(1) if CORE::kill( 0, $pid );
+    sleep(2) if CORE::kill( 0, $pid );
 
     unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
         CORE::kill( 15, $pid );                       # try SIGTERM
-        sleep(1) if CORE::kill( 0, $pid );
+        sleep(2) if CORE::kill( 0, $pid );
     }
 
     unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
         CORE::kill( 9, $pid );                        # finally try SIGKILL
-        sleep(1) if CORE::kill( 0, $pid );
+        sleep(2) if CORE::kill( 0, $pid );
     }
 
     unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
