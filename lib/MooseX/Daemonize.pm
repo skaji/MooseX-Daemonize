@@ -57,7 +57,8 @@ sub check {
         if ( CORE::kill 0 => $pid ) {
             croak "$prog already running ($pid).";
         }
-        carp "$prog not running but $pid exists. Perhaps it is stale?";
+        carp "$prog not running but found pid ($pid)."
+          . "Perhaps the pid file (@{ [$self->pidfile] }) is stale?";
         return 1;
     }
     return 0;
