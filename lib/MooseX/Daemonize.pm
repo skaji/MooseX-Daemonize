@@ -76,9 +76,11 @@ sub start {
     $self->daemonize unless $self->foreground;
 
     # Avoid 'stdin reopened for output' warning with newer perls
+    ## no critic
     open( NULL, '/dev/null' );
     <NULL> if (0);
-
+    ## use critic
+    
     $self->save_pid;
     $self->setup_signals;
     return $$;
