@@ -22,6 +22,13 @@ has progname => (
     },
 );
 
+has basedir => (
+    isa     => 'Str',
+    is      => 'ro',
+    lazy    => 1,
+    default => sub { return '/' },
+);
+
 has pidbase => (
     isa => 'Str',
     is  => 'ro',
@@ -80,6 +87,9 @@ sub start {
     open( NULL, '/dev/null' );
     <NULL> if (0);
     ## use critic
+    
+    # Change to basedir
+    chdir $self->basedir;
     
     $self->save_pid;
     $self->setup_signals;
