@@ -1,18 +1,28 @@
 .cvsignore
 Build.PL
 Changes
+examples/moose_room.pl
+inc/Module/AutoInstall.pm
 inc/Module/Install.pm
+inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
+inc/Module/Install/Build.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
-inc/Module/Install/MakeMaker.pm
 inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 lib/MooseX/Daemonize.pm
+lib/Test/MooseX/Daemonize.pm
 Makefile.PL
-MANIFEST
-META.yml			# Will be created by "make dist"
+MANIFEST			This list of files
+META.yml
 README
 t/00.load.t
 t/01.filecreate.t
+t/02.stdout.t
 t/kwalitee.t
 t/perlcritic.t
 t/pod-coverage.t
