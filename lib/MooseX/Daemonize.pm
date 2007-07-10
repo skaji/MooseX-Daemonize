@@ -127,7 +127,7 @@ sub get_pid {
 sub stop {
     my ( $self, %args ) = @_;
     my $pid = $self->get_pid;
-    $self->kill($pid) unless $self->foreground();
+    $self->_kill($pid) unless $self->foreground();
     $self->remove_pid;
     return 1 if $args{no_exit};
     exit;
@@ -148,7 +148,8 @@ sub setup_signals {
 sub handle_sigint { $_[0]->stop; }
 sub handle_sighup { $_[0]->restart; }
 
-sub kill {
+sub _kill {
+    confess "_kill isn't public" unless caller eq __PACKAGE__;
     my ( $self, $pid ) = @_;
     return unless $pid;
     unless ( CORE::kill 0 => $pid ) {
@@ -281,21 +282,27 @@ Setup the signal handlers, by default it only sets up handlers for SIGINT and SI
 
 =item handle_sigint()
 
-Handle a INT signal, by default calls C<$self->stop()>;
+Handle a INT signal, by default calls C<$self->stop()>
 
 =item handle_sighup()
 
-Handle a HUP signal. Nothing is done by default.
+Handle a HUP signal. By default calls C<$self->restart()>
 
 =item get_pid
 
+Lookup the pid from our pidfile.
+
 =item save_pid
+
+Save the current pid in our pidfile
 
 =item remove_pid
 
+Delete our pidfile
+
 =item meta()
 
-the C<meta()> method from L<Class::MOP::Class>
+The C<meta()> method from L<Class::MOP::Class>
 
 =back
 
