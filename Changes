@@ -1,5 +1,10 @@
 Revision history for MooseX-Daemonize
 
+0.02 ???
+    - Add the GetOpt prereq
+	- Adjust the kill timings
+	- Added THANKS to pod
+
 0.0.1  Wed May 16 11:46:56 2007
        Initial release.
 

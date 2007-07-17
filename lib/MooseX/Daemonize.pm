@@ -135,7 +135,7 @@ sub stop {
 
 sub restart {
     my ($self) = @_;
-    $self->stop( noexit => 1 );
+    $self->stop( no_exit => 1 );
     $self->start();
 }
 
@@ -174,7 +174,7 @@ sub _kill {
 
     unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
         CORE::kill( 9, $pid );                        # finally try SIGKILL
-        sleep(2) if CORE::kill( 0, $pid );
+        sleep(3) if CORE::kill( 0, $pid );
     }
 
     unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
@@ -353,6 +353,9 @@ L<Proc::Daemon>, L<Daemon::Generic>, L<MooseX::Getopt>
 
 Chris Prather  C<< <perigrin@cpan.org> >>
 
+=head1 THANKS
+
+Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, and the #moose denzians
 
 =head1 LICENCE AND COPYRIGHT
 

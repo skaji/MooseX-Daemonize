@@ -1,0 +1,1 @@
+* 2:36 : mike : A slightly different would be to have another object, which is a daemon, which is the keeper of the PIDs. It can bind to a port and then your other objects would actually cause things to happen without needing a PID file.
