@@ -2,12 +2,12 @@ package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
-our $VERSION = 0.01;
+our $VERSION = 0.01_1;
 use Carp;
 use Proc::Daemon;
 
-use File::Flock;
-use File::Slurp;
+use File::Pid;
+use Moose::Util::TypeConstraints;
 
 with qw(MooseX::Getopt);
 
@@ -38,14 +38,27 @@ has pidbase => (
     default => sub { return '/var/run' },
 );
 
+subtype 'Pidfile' => as 'Object' => where { $_->isa('File::Pid') };
+coerce 'Pidfile' => from 'Str' => via {
+    File::Pid->new( { file => $_, } );
+};
+
 has pidfile => (
-    isa      => 'Str',
+    isa      => 'Pidfile',
     is       => 'ro',
     lazy     => 1,
     required => 1,
+    coerce   => 1,
     default  => sub {
         die 'Cannot write to ' . $_[0]->pidbase unless -w $_[0]->pidbase;
-        $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
+        my $file = $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
+        File::Pid->new( { file => $file } );
+    },
+    handles => {
+        check      => 'running',
+        save_pid   => 'write',
+        remove_pid => 'remove',
+        get_pid    => 'pid',
     },
 );
 
@@ -56,20 +69,6 @@ has foreground => (
     is          => 'ro',
     default     => sub { 0 },
 );
-
-sub check {
-    my ($self) = @_;
-    if ( my $pid = $self->get_pid ) {
-        my $prog = $self->progname;
-        if ( CORE::kill 0 => $pid ) {
-            croak "$prog already running ($pid).";
-        }
-        carp "$prog not running but found pid ($pid)."
-          . "Perhaps the pid file (@{ [$self->pidfile] }) is stale?";
-        return 1;
-    }
-    return 0;
-}
 
 sub daemonize {
     my ($self) = @_;
@@ -87,41 +86,13 @@ sub start {
     open( NULL, '/dev/null' );
     <NULL> if (0);
     ## use critic
-    
+
     # Change to basedir
     chdir $self->basedir;
-    
+
     $self->save_pid;
     $self->setup_signals;
     return $$;
-}
-
-sub save_pid {
-    my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    lock( $pidfile, undef, 'nonblocking' )
-      or croak "Could not lock PID file $pidfile: $!";
-    write_file( $pidfile, "$$\n" );
-    unlock($pidfile);
-    return;
-}
-
-sub remove_pid {
-    my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    lock( $pidfile, undef, 'nonblocking' )
-      or croak "Could not lock PID file $pidfile: $!";
-    unlink($pidfile);
-    unlock($pidfile);
-    return;
-}
-
-sub get_pid {
-    my ($self) = @_;
-    my $pidfile = $self->pidfile;
-    return unless -e $pidfile;
-    chomp( my $pid = read_file($pidfile) );
-    return $pid;
 }
 
 sub stop {
@@ -314,7 +285,7 @@ The C<meta()> method from L<Class::MOP::Class>
     the module is part of the standard Perl distribution, part of the
     module's distribution, or must be installed separately. ]
 
-Obviously L<Moose>, also L<Carp>, L<Proc::Daemon>, L<File::Flock>, L<File::Slurp>
+Obviously L<Moose>, also L<Carp>, L<Proc::Daemon>, L<File::Pid>
 
 =head1 INCOMPATIBILITIES
 
