@@ -2,6 +2,7 @@
 Build.PL
 Changes
 examples/moose_room.pl
+IDEAS
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -14,6 +15,7 @@ inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+lab/dec.pl
 lib/MooseX/Daemonize.pm
 lib/Test/MooseX/Daemonize.pm
 Makefile.PL
