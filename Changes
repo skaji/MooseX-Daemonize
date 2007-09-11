@@ -1,6 +1,10 @@
 Revision history for MooseX-Daemonize
 
 0.02 ???
+	- Fixed bug where sometimes the pidfile is writeable but pidbase is not --  reported by dec 
+    - Fixed bug where the pidfile wasn't being updated properly --  reported by dec 
+	- Added is_daemon attribute
+	- Added another fork to make sure we short circuit out of the daemonize process properly
 	- Switch to File::Pid
     - Add the GetOpt prereq
 	- Adjust the kill timings

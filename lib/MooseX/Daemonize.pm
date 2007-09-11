@@ -50,8 +50,8 @@ has pidfile => (
     coerce    => 1,
     predicate => 'has_pidfile',
     default   => sub {
-        die 'Cannot write to ' . $_[0]->pidbase unless -w $_[0]->pidbase;
         my $file = $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
+        die "Cannot write to $file" unless (-e $file ? -w $file : -w $_[0]->pidbase);
         File::Pid->new( { file => $file } );
     },
     handles => {
@@ -225,6 +225,10 @@ The file we store our PID in, defaults to /var/run/$progname/
 =item foreground Bool
 
 If true, the process won't background. Useful for debugging. This option can be set via Getopt's -f.
+
+=item is_daemon Bool
+
+If true, the process is the backgrounded process. This is useful for example in an after 'start' => sub { } block
 
 =back
 
