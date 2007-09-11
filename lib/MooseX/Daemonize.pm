@@ -2,7 +2,7 @@ package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
-our $VERSION = 0.01_1;
+our $VERSION = 0.02;
 use Carp;
 use Proc::Daemon;
 
@@ -23,33 +23,33 @@ has progname => (
 );
 
 has basedir => (
-    isa     => 'Str',
-    is      => 'ro',
-    lazy    => 1,
-    default => sub { return '/' },
+    isa      => 'Str',
+    is       => 'ro',
+    required => 1,
+    lazy     => 1,
+    default  => sub { return '/' },
 );
 
 has pidbase => (
-    isa => 'Str',
-    is  => 'ro',
-
-    #    required => 1,
-    lazy    => 1,
-    default => sub { return '/var/run' },
-);
-
-subtype 'Pidfile' => as 'Object' => where { $_->isa('File::Pid') };
-coerce 'Pidfile' => from 'Str' => via {
-    File::Pid->new( { file => $_, } );
-};
-
-has pidfile => (
-    isa      => 'Pidfile',
+    isa      => 'Str',
     is       => 'ro',
     lazy     => 1,
     required => 1,
-    coerce   => 1,
-    default  => sub {
+    default  => sub { return '/var/run' },
+);
+
+subtype 'Pidfile' => as 'Object' => where { $_->isa('File::Pid') };
+
+coerce 'Pidfile' => from 'Str' => via { File::Pid->new( { file => $_, } ); };
+
+has pidfile => (
+    isa       => 'Pidfile',
+    is        => 'rw',
+    lazy      => 1,
+    required  => 1,
+    coerce    => 1,
+    predicate => 'has_pidfile',
+    default   => sub {
         die 'Cannot write to ' . $_[0]->pidbase unless -w $_[0]->pidbase;
         my $file = $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
         File::Pid->new( { file => $file } );
@@ -59,27 +59,39 @@ has pidfile => (
         save_pid   => 'write',
         remove_pid => 'remove',
         get_pid    => 'pid',
+        _pidfile   => 'file',
     },
 );
 
 has foreground => (
-    metaclass   => 'Getopt',
-    cmd_aliases => ['f'],
+    metaclass   => 'MooseX::Getopt::Meta::Attribute',
+    cmd_aliases => 'f',
     isa         => 'Bool',
     is          => 'ro',
     default     => sub { 0 },
 );
 
+has is_daemon => (
+    isa     => 'Bool',
+    is      => 'rw',
+    default => sub { 0 },
+);
+
 sub daemonize {
     my ($self) = @_;
+    return if Proc::Daemon::Fork;
     Proc::Daemon::Init;
+    $self->is_daemon(1);
 }
 
 sub start {
     my ($self) = @_;
-    return if $self->check;
-
+    confess "instance already running" if $self->check;
     $self->daemonize unless $self->foreground;
+
+    return unless $self->is_daemon;
+
+    $self->pidfile->pid($$);
 
     # Avoid 'stdin reopened for output' warning with newer perls
     ## no critic
@@ -200,7 +212,7 @@ This module helps provide the basic infrastructure to do that.
 
 =item progname Str
 
-The name of our daemon, defaults to $0
+The name of our daemon, defaults to $self->meta->name =~ s/::/_/;
 
 =item pidbase Str
 

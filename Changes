@@ -1,6 +1,7 @@
 Revision history for MooseX-Daemonize
 
 0.02 ???
+	- Switch to File::Pid
     - Add the GetOpt prereq
 	- Adjust the kill timings
 	- Added THANKS to pod
