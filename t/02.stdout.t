@@ -20,11 +20,10 @@ my $Test = Test::Builder->new;
     sub output_ok {
         my ($self) = @_;
         my $count = 1;
-        while (1) {
+        for ( 0 .. 3 ) {
             $Test->ok( $count++, "$count output_ok" );
             sleep(1);
         }
-
     }
     no Moose;
 }
@@ -40,8 +39,9 @@ my $app = TestOutput->new(
     test_output => join( '/', $cwd, 'results' ),
 );
 daemonize_ok( $app, 'child forked okay' );
-sleep(5);    # give ourself a chance to produce some output
+sleep(3);    # give ourself a chance to produce some output
 $app->stop( no_exit => 1 );
 
 check_test_output($app);
 unlink( $app->test_output );
+exit;
