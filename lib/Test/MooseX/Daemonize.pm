@@ -2,25 +2,26 @@ use strict;
 
 package Test::MooseX::Daemonize;
 use Proc::Daemon;
-use File::Slurp;
 
 # BEGIN CARGO CULTING
 use Sub::Exporter;
 use Test::Builder;
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
-my @exports = qw[
-  daemonize_ok
-  check_test_output
-];
+{
+    my @exports = qw[
+      daemonize_ok
+      check_test_output
+    ];
 
-Sub::Exporter::setup_exporter(
-    {
-        exports => \@exports,
-        groups  => { default => \@exports }
-    }
-);
+    Sub::Exporter::setup_exporter(
+        {
+            exports => \@exports,
+            groups  => { default => \@exports }
+        }
+    );
+}
 
 our $Test = Test::Builder->new;
 
@@ -33,7 +34,8 @@ sub daemonize_ok {
     else {
         sleep(1);    # Punt on sleep time, 1 seconds should be enough
         $Test->ok( -e $daemon->pidfile->file, $msg )
-          || $Test->diag( 'Pidfile (' . $daemon->pidfile->file . ') not found.' );
+          || $Test->diag(
+            'Pidfile (' . $daemon->pidfile->file . ') not found.' );
     }
 }
 
