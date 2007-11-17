@@ -363,6 +363,8 @@ Chris Prather  C<< <perigrin@cpan.org> >>
 Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the 
 #moose denzians
 
+Some bug fixes sponsored by Takkle Inc.
+
 =head1 LICENCE AND COPYRIGHT
 
 Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
