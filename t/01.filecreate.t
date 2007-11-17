@@ -25,6 +25,8 @@ use MooseX::Daemonize;
 }
 
 package main;
+use strict;
+use warnings;
 use Cwd;
 
 ## Try to make sure we are in the test directory
@@ -36,7 +38,7 @@ my $app = FileMaker->new(
     filename => "$cwd/im_alive",
 );
 daemonize_ok( $app, 'child forked okay' );
-ok( -e $app->filename, "$file exists" );
+ok( -e $app->filename, "file exists" );
 ok( $app->stop( no_exit => 1 ), 'app stopped' );
-ok( -e $app->pidfile == undef, 'pidfile gone' );
+ok( not(-e $app->pidfile) , 'pidfile gone' );
 unlink( $app->filename );

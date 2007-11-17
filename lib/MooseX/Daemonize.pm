@@ -2,7 +2,7 @@ package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
-our $VERSION = 0.02;
+our $VERSION = 0.04;
 use Carp;
 use Proc::Daemon;
 
@@ -77,6 +77,12 @@ has is_daemon => (
     default => sub { 0 },
 );
 
+has stop_timeout => (
+    isa     => 'Int',
+    is      => 'rw',
+    default => 2
+);
+
 sub daemonize {
     my ($self) = @_;
     return if Proc::Daemon::Fork;
@@ -107,10 +113,13 @@ sub start {
     return $$;
 }
 
+# Make _kill *really* private
+my $_kill;
+
 sub stop {
     my ( $self, %args ) = @_;
     my $pid = $self->get_pid;
-    $self->_kill($pid) unless $self->foreground();
+    $self->$_kill($pid) unless $self->foreground();
     $self->remove_pid;
     return 1 if $args{no_exit};
     exit;
@@ -131,8 +140,7 @@ sub setup_signals {
 sub handle_sigint { $_[0]->stop; }
 sub handle_sighup { $_[0]->restart; }
 
-sub _kill {
-    confess "_kill isn't public" unless caller eq __PACKAGE__;
+$_kill = sub {
     my ( $self, $pid ) = @_;
     return unless $pid;
     unless ( CORE::kill 0 => $pid ) {
@@ -143,42 +151,48 @@ sub _kill {
 
     if ( $pid eq $$ ) {
 
-        # warn "$pid is us! Can't commit suicied.";
+        # warn "$pid is us! Can't commit suicide.";
         return;
     }
 
-    CORE::kill( 2, $pid );    # Try SIGINT
-    sleep(2) if CORE::kill( 0, $pid );
+    my $timeout = $self->stop_timeout;
 
-    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        CORE::kill( 15, $pid );                       # try SIGTERM
-        sleep(2) if CORE::kill( 0, $pid );
+    # kill 0 => $pid returns 0 if the process is dead
+    # $!{EPERM} could also be true if we cant kill it (permission error)
+
+    # Try SIGINT ... 2s ... SIGTERM ... 2s ... SIGKILL ... 3s ... UNDEAD!
+    for ( [ 2, $timeout ], [15, $timeout], [9, $timeout * 1.5] ) {
+      my ($signal, $timeout) = @$_;
+      $timeout = int $timeout;
+
+      CORE::kill($signal, $pid);
+
+      last unless CORE::kill 0 => $pid or $!{EPERM};
+
+      while ($timeout) {
+        sleep(1);
+        last unless CORE::kill 0 => $pid or $!{EPERM};
+        $timeout--;
+      }
     }
 
-    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        CORE::kill( 9, $pid );                        # finally try SIGKILL
-        sleep(3) if CORE::kill( 0, $pid );
-    }
+    return unless ( CORE::kill 0 => $pid or $!{EPERM} );
 
-    unless ( CORE::kill 0 => $pid or $!{EPERM} ) {    # IF it is still running
-        carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
-    }
-
-    return;
-}
+    # IF it is still running
+    carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
+};
 
 1;
 __END__
 
 =head1 NAME
 
-MooseX::Daemonize - provides a Role that daemonizes your Moose based application.
-
+MooseX::Daemonize - provides a Role that daemonizes your Moose based 
+application.
 
 =head1 VERSION
 
-This document describes MooseX::Daemonize version 0.0.1
-
+This document describes MooseX::Daemonize version 0.04
 
 =head1 SYNOPSIS
 
@@ -203,8 +217,9 @@ This document describes MooseX::Daemonize version 0.0.1
      
 =head1 DESCRIPTION
 
-Often you want to write a persistant daemon that has a pid file, and responds appropriately to Signals. 
-This module helps provide the basic infrastructure to do that.
+Often you want to write a persistant daemon that has a pid file, and responds
+appropriately to Signals.  This module helps provide the basic infrastructure
+to do that.
 
 =head1 ATTRIBUTES
 
@@ -224,11 +239,18 @@ The file we store our PID in, defaults to /var/run/$progname/
 
 =item foreground Bool
 
-If true, the process won't background. Useful for debugging. This option can be set via Getopt's -f.
+If true, the process won't background. Useful for debugging. This option can 
+be set via Getopt's -f.
 
 =item is_daemon Bool
 
-If true, the process is the backgrounded process. This is useful for example in an after 'start' => sub { } block
+If true, the process is the backgrounded process. This is useful for example
+in an after 'start' => sub { } block
+
+=item stop_timeout
+
+Number of seconds to wait for the process to stop, before trying harder to kill
+it. Defaults to 2 seconds
 
 =back
 
@@ -258,10 +280,6 @@ Litterally
 =item daemonize()
 
 Calls C<Proc::Daemon::Init> to daemonize this process. 
-
-=item kill($pid)
-
-Kills the process for $pid. This will try SIGINT, and SIGTERM before falling back to SIGKILL and finally giving up.
 
 =item setup_signals()
 
@@ -342,11 +360,13 @@ Chris Prather  C<< <perigrin@cpan.org> >>
 
 =head1 THANKS
 
-Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, and the #moose denzians
+Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the 
+#moose denzians
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserved.
+Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
+reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

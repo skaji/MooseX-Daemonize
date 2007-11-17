@@ -1,14 +1,24 @@
 Revision history for MooseX-Daemonize
 
-0.02 ???
-	- Fixed bug where sometimes the pidfile is writeable but pidbase is not --  reported by dec 
+    - Fix logic that kills process so it doens't always warn about undead 
+      process
+    - Added stop_timeout to allow user to control timings.
+
+0.04 2007-11-11
+    - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were stupid but I didn't realize it.
+
+0.03 2007-10-22
+    - Add File::Slurp to dependencies so our tests pass better
+
+0.02 Sept 19, 2007
+    - Fixed bug where sometimes the pidfile is writeable but pidbase is not --  reported by dec 
     - Fixed bug where the pidfile wasn't being updated properly --  reported by dec 
-	- Added is_daemon attribute
-	- Added another fork to make sure we short circuit out of the daemonize process properly
-	- Switch to File::Pid
+    - Added is_daemon attribute
+    - Added another fork to make sure we short circuit out of the daemonize process properly
+    - Switch to File::Pid
     - Add the GetOpt prereq
-	- Adjust the kill timings
-	- Added THANKS to pod
+    - Adjust the kill timings
+    - Added THANKS to pod
 
 0.0.1  Wed May 16 11:46:56 2007
        Initial release.

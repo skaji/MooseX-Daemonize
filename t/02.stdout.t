@@ -30,6 +30,8 @@ my $Test = Test::Builder->new;
 
 package main;
 use Cwd;
+use strict;
+use warnings;
 
 ## Try to make sure we are in the test directory
 chdir 't' if ( Cwd::cwd() !~ m|/t$| );
@@ -40,7 +42,14 @@ my $app = TestOutput->new(
 );
 daemonize_ok( $app, 'child forked okay' );
 sleep(3);    # give ourself a chance to produce some output
-$app->stop( no_exit => 1 );
+
+my $warnings = "";
+{
+	local $SIG{__WARN__} = sub { $warnings .= $_[0]; warn @_ };
+	$app->stop( no_exit => 1 );
+}
+
+is($warnings, "", "No warnings from stop");
 
 check_test_output($app);
 unlink( $app->test_output );
