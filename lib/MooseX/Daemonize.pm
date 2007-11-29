@@ -10,7 +10,11 @@ use Carp 'carp';
 use Proc::Daemon;
 use MooseX::Daemonize::PidFile;
 
-with qw(MooseX::Getopt);
+with qw[
+    MooseX::Daemonize::Core
+    MooseX::Daemonize::SignalHandling
+    MooseX::Getopt
+];
 
 has progname => (
     isa      => 'Str',
@@ -73,24 +77,12 @@ has foreground => (
     default     => sub { 0 },
 );
 
-has is_daemon => (
-    isa     => 'Bool',
-    is      => 'rw',
-    default => sub { 0 },
-);
 
 has stop_timeout => (
     isa     => 'Int',
     is      => 'rw',
     default => sub { 2 }
 );
-
-sub daemonize {
-    my ($self) = @_;
-    return if Proc::Daemon::Fork;
-    Proc::Daemon::Init;
-    $self->is_daemon(1);
-}
 
 sub start {
     my ($self) = @_;
@@ -135,10 +127,10 @@ sub restart {
     $self->start();
 }
 
-sub setup_signals {
-    my ($self) = @_;
-    $SIG{INT} = sub { $self->handle_sigint; };
-    $SIG{HUP} = sub { $self->handle_sighup };
+sub handle_signal {
+    my ($self, $signal) = @_;
+    return $self->handle_sigint if $signal eq 'INT';
+    return $self->handle_sighup if $signal eq 'HUP';    
 }
 
 sub handle_sigint { $_[0]->stop; }
