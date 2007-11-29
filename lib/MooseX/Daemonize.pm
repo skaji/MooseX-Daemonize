@@ -1,13 +1,14 @@
 package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
-
-our $VERSION = 0.04;
-use Carp;
-use Proc::Daemon;
-
-use File::Pid;
+use MooseX::Types::Path::Class;
 use Moose::Util::TypeConstraints;
+
+our $VERSION = 0.05;
+
+use Carp 'carp';
+use Proc::Daemon;
+use MooseX::Daemonize::PidFile;
 
 with qw(MooseX::Getopt);
 
@@ -23,27 +24,29 @@ has progname => (
 );
 
 has basedir => (
-    isa      => 'Str',
+    isa      => 'Path::Class::Dir',
     is       => 'ro',
+    coerce   => 1,
     required => 1,
     lazy     => 1,
-    default  => sub { return '/' },
+    default  => sub { Path::Class::Dir->new('/') },
 );
 
 has pidbase => (
-    isa      => 'Str',
+    isa      => 'Path::Class::Dir',
     is       => 'ro',
+    coerce   => 1,
+    required => 1,    
     lazy     => 1,
-    required => 1,
-    default  => sub { return '/var/run' },
+    default  => sub { Path::Class::Dir->new('var', 'run') },
 );
 
-subtype 'Pidfile' => as 'Object' => where { $_->isa('File::Pid') };
-
-coerce 'Pidfile' => from 'Str' => via { File::Pid->new( { file => $_, } ); };
+coerce 'MooseX::Daemonize::PidFile' 
+    => from 'Str' 
+        => via { MooseX::Daemonize::PidFile->new( file => $_ ) };
 
 has pidfile => (
-    isa       => 'Pidfile',
+    isa       => 'MooseX::Daemonize::PidFile',
     is        => 'rw',
     lazy      => 1,
     required  => 1,
@@ -51,20 +54,19 @@ has pidfile => (
     predicate => 'has_pidfile',
     default   => sub {
         my $file = $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
-        die "Cannot write to $file" unless (-e $file ? -w $file : -w $_[0]->pidbase);
-        File::Pid->new( { file => $file } );
+        confess "Cannot write to $file" unless (-e $file ? -w $file : -w $_[0]->pidbase);
+        MooseX::Daemonize::PidFile->new( file => $file );
     },
     handles => {
         check      => 'running',
         save_pid   => 'write',
         remove_pid => 'remove',
         get_pid    => 'pid',
-        _pidfile   => 'file',
     },
 );
 
 has foreground => (
-    metaclass   => 'MooseX::Getopt::Meta::Attribute',
+    metaclass   => 'Getopt',
     cmd_aliases => 'f',
     isa         => 'Bool',
     is          => 'ro',
@@ -80,7 +82,7 @@ has is_daemon => (
 has stop_timeout => (
     isa     => 'Int',
     is      => 'rw',
-    default => 2
+    default => sub { 2 }
 );
 
 sub daemonize {
@@ -92,7 +94,9 @@ sub daemonize {
 
 sub start {
     my ($self) = @_;
+    
     confess "instance already running" if $self->check;
+    
     $self->daemonize unless $self->foreground;
 
     return unless $self->is_daemon;
@@ -225,17 +229,17 @@ to do that.
 
 =over
 
-=item progname Str
+=item progname Path::Class::Dir | Str
 
 The name of our daemon, defaults to $self->meta->name =~ s/::/_/;
 
-=item pidbase Str
+=item pidbase Path::Class::Dir | Str
 
 The base for our bid, defaults to /var/run/$progname
 
-=item pidfile Str
+=item pidfile MooseX::Daemonize::PidFile | Str
 
-The file we store our PID in, defaults to /var/run/$progname/ 
+The file we store our PID in, defaults to /var/run/$progname
 
 =item foreground Bool
 
@@ -319,7 +323,7 @@ The C<meta()> method from L<Class::MOP::Class>
     the module is part of the standard Perl distribution, part of the
     module's distribution, or must be installed separately. ]
 
-Obviously L<Moose>, also L<Carp>, L<Proc::Daemon>, L<File::Pid>
+Obviously L<Moose>, and L<Proc::Daemon>
 
 =head1 INCOMPATIBILITIES
 

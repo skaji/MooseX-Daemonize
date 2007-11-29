@@ -9,8 +9,6 @@ all_from 'lib/MooseX/Daemonize.pm';
 build_requires 'Test::More'  => 0;
 
 requires 'Proc::Daemon'      => 0;
-requires 'Carp'              => 0;
-requires 'File::Pid'         => 0;
 requires 'MooseX::Getopt'    => 0;
 requires 'Moose'             => 0.20;
 

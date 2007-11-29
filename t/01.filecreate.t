@@ -13,6 +13,7 @@ use MooseX::Daemonize;
     with qw(MooseX::Daemonize);
 
     has filename => ( isa => 'Str', is => 'ro' );
+    
     after start => sub { $_[0]->create_file( $_[0]->filename ) };
 
     sub create_file {

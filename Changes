@@ -1,8 +1,14 @@
 Revision history for MooseX-Daemonize
 
-    - Fix logic that kills process so it doens't always warn about undead 
-      process
-    - Added stop_timeout to allow user to control timings.
+0.05
+    * MooseX::Daemonize
+      - Fix logic that kills process so it doens't always warn about undead 
+        process
+      - Added stop_timeout to allow user to control timings.
+    
+    * MooseX::Daemonize::PidFile
+      - added this package to replace the File::Pid stuff (stevan)
+        - added tests for this (stevan)
 
 0.04 2007-11-11
     - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were stupid but I didn't realize it.
