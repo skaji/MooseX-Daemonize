@@ -12,7 +12,7 @@ use MooseX::Daemonize::PidFile;
 
 with qw[
     MooseX::Daemonize::Core
-    MooseX::Daemonize::SignalHandling
+    MooseX::Daemonize::WithSignalHandling
     MooseX::Getopt
 ];
 

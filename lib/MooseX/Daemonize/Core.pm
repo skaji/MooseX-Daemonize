@@ -15,9 +15,7 @@ has is_daemon => (
 sub daemon_fork   { fork }
 sub daemon_detach { 
     # ignore these signals
-    for (qw(TSTP TTIN TTOU PIPE POLL STOP CONT CHLD)) {
-        $SIG{$_} = 'IGNORE' if (exists $SIG{$_});
-    }
+    $SIG{'HUP'} = 'IGNORE';
     
     POSIX::setsid;  # set session id
     chdir '/';      # change to root directory

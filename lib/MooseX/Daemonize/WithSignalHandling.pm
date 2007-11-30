@@ -1,4 +1,4 @@
-package MooseX::Daemonize::SignalHandling;
+package MooseX::Daemonize::WithSignalHandling;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
