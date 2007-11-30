@@ -61,12 +61,6 @@ has pidfile => (
         confess "Cannot write to $file" unless (-e $file ? -w $file : -w $_[0]->pidbase);
         MooseX::Daemonize::PidFile->new( file => $file );
     },
-    handles => {
-        check      => 'running',
-        save_pid   => 'write',
-        remove_pid => 'remove',
-        get_pid    => 'pid',
-    },
 );
 
 has foreground => (
@@ -87,7 +81,7 @@ has stop_timeout => (
 sub start {
     my ($self) = @_;
     
-    confess "instance already running" if $self->check;
+    confess "instance already running" if $self->pidfile->running;
     
     $self->daemonize unless $self->foreground;
 
@@ -104,7 +98,7 @@ sub start {
     # Change to basedir
     chdir $self->basedir;
 
-    $self->save_pid;
+    $self->pidfile->write;
     $self->setup_signals;
     return $$;
 }
@@ -114,9 +108,9 @@ my $_kill;
 
 sub stop {
     my ( $self, %args ) = @_;
-    my $pid = $self->get_pid;
+    my $pid = $self->pidfile->pid;
     $self->$_kill($pid) unless $self->foreground();
-    $self->remove_pid;
+    $self->pidfile->remove;
     return 1 if $args{no_exit};
     exit;
 }
@@ -254,10 +248,6 @@ it. Defaults to 2 seconds
 
 =over
 
-=item check()
-
-Check to see if an instance is already running.
-
 =item start()
 
 Setup a pidfile, fork, then setup the signal handlers.
@@ -288,18 +278,6 @@ Handle a INT signal, by default calls C<$self->stop()>
 =item handle_sighup()
 
 Handle a HUP signal. By default calls C<$self->restart()>
-
-=item get_pid
-
-Lookup the pid from our pidfile.
-
-=item save_pid
-
-Save the current pid in our pidfile
-
-=item remove_pid
-
-Delete our pidfile
 
 =item meta()
 
