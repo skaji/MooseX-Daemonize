@@ -1,7 +1,8 @@
 package MooseX::Daemonize::PidFile;
 use strict;    # because Kwalitee is pedantic
 use Moose;
-use MooseX::Types::Path::Class;
+
+use MooseX::Daemonize::Types;
 
 our $VERSION = '0.01';
 

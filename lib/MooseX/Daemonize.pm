@@ -1,18 +1,15 @@
 package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
-use MooseX::Types::Path::Class;
-use Moose::Util::TypeConstraints;
+
+use MooseX::Daemonize::Types;
 
 our $VERSION = 0.05;
-
-use Carp 'carp';
-use Proc::Daemon;
-use MooseX::Daemonize::PidFile;
 
 with qw[
     MooseX::Daemonize::Core
     MooseX::Daemonize::WithSignalHandling
+    MooseX::Daemonize::WithPidFile    
     MooseX::Getopt
 ];
 
@@ -27,15 +24,6 @@ has progname => (
     },
 );
 
-has basedir => (
-    isa      => 'Path::Class::Dir',
-    is       => 'ro',
-    coerce   => 1,
-    required => 1,
-    lazy     => 1,
-    default  => sub { Path::Class::Dir->new('/') },
-);
-
 has pidbase => (
     isa      => 'Path::Class::Dir',
     is       => 'ro',
@@ -45,22 +33,13 @@ has pidbase => (
     default  => sub { Path::Class::Dir->new('var', 'run') },
 );
 
-coerce 'MooseX::Daemonize::PidFile' 
-    => from 'Str' 
-        => via { MooseX::Daemonize::PidFile->new( file => $_ ) };
-
-has pidfile => (
-    isa       => 'MooseX::Daemonize::PidFile',
-    is        => 'rw',
-    lazy      => 1,
-    required  => 1,
-    coerce    => 1,
-    predicate => 'has_pidfile',
-    default   => sub {
-        my $file = $_[0]->pidbase . '/' . $_[0]->progname . '.pid';
-        confess "Cannot write to $file" unless (-e $file ? -w $file : -w $_[0]->pidbase);
-        MooseX::Daemonize::PidFile->new( file => $file );
-    },
+has basedir => (
+    isa      => 'Path::Class::Dir',
+    is       => 'ro',
+    coerce   => 1,
+    required => 1,
+    lazy     => 1,
+    default  => sub { Path::Class::Dir->new('/') },
 );
 
 has foreground => (
@@ -71,12 +50,18 @@ has foreground => (
     default     => sub { 0 },
 );
 
-
 has stop_timeout => (
     isa     => 'Int',
     is      => 'rw',
     default => sub { 2 }
 );
+
+sub init_pidfile {
+    my $self = shift;
+    my $file = $self->pidbase . '/' . $self->progname . '.pid';
+    confess "Cannot write to $file" unless (-e $file ? -w $file : -w $self->pidbase);
+    MooseX::Daemonize::PidFile->new( file => $file );
+}
 
 sub start {
     my ($self) = @_;
@@ -169,7 +154,7 @@ $_kill = sub {
     return unless ( CORE::kill 0 => $pid or $!{EPERM} );
 
     # IF it is still running
-    carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
+    Carp::carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
 };
 
 1;
