@@ -8,7 +8,6 @@ all_from 'lib/MooseX/Daemonize.pm';
 # Specific dependencies
 build_requires 'Test::More'  => 0;
 
-requires 'Proc::Daemon'      => 0;
 requires 'MooseX::Getopt'    => 0;
 requires 'Moose'             => 0.20;
 

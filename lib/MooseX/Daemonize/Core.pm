@@ -4,7 +4,7 @@ use Moose::Role;
 
 our $VERSION = 0.01;
 
-use Proc::Daemon;
+use POSIX ();
 
 has is_daemon => (
     isa     => 'Bool',
@@ -12,8 +12,28 @@ has is_daemon => (
     default => sub { 0 },
 );
 
-sub daemon_fork   { Proc::Daemon::Fork }
-sub daemon_detach { Proc::Daemon::Init }
+sub daemon_fork   { fork }
+sub daemon_detach { 
+    # ignore these signals
+    for (qw(TSTP TTIN TTOU PIPE POLL STOP CONT CHLD)) {
+        $SIG{$_} = 'IGNORE' if (exists $SIG{$_});
+    }
+    
+    POSIX::setsid;  # set session id
+    chdir '/';      # change to root directory
+    umask 0;        # clear the file creation mask            
+    
+    # get the max numnber of possible file descriptors
+    my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
+    $openmax = 64 if !defined($openmax) || $openmax < 0;
+    
+    # close them all 
+    POSIX::close($_) foreach (0 .. $openmax);
+
+    open(STDIN,  "+>/dev/null");
+    open(STDOUT, "+>&STDIN");
+    open(STDERR, "+>&STDIN");    
+}
 
 sub daemonize {
     my ($self) = @_;

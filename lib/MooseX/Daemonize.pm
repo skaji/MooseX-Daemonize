@@ -152,18 +152,18 @@ $_kill = sub {
 
     # Try SIGINT ... 2s ... SIGTERM ... 2s ... SIGKILL ... 3s ... UNDEAD!
     for ( [ 2, $timeout ], [15, $timeout], [9, $timeout * 1.5] ) {
-      my ($signal, $timeout) = @$_;
-      $timeout = int $timeout;
-
-      CORE::kill($signal, $pid);
-
-      last unless CORE::kill 0 => $pid or $!{EPERM};
-
-      while ($timeout) {
-        sleep(1);
+        my ($signal, $timeout) = @$_;
+        $timeout = int $timeout;
+        
+        CORE::kill($signal, $pid);
+        
         last unless CORE::kill 0 => $pid or $!{EPERM};
-        $timeout--;
-      }
+        
+        while ($timeout) {
+            sleep(1);
+            last unless CORE::kill 0 => $pid or $!{EPERM};
+            $timeout--;
+        }
     }
 
     return unless ( CORE::kill 0 => $pid or $!{EPERM} );
