@@ -1,5 +1,4 @@
 package MooseX::Daemonize::Core;
-use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 
 our $VERSION = 0.01;
@@ -12,12 +11,24 @@ has is_daemon => (
     default => sub { 0 },
 );
 
-sub daemon_fork   { fork }
+sub daemon_fork { 
+    my $self = shift;
+    if (my $pid = fork) {
+        return $pid;
+    }
+    else {
+        $self->is_deamon(1);
+        return;
+    }
+}
 sub daemon_detach { 
-    # ignore these signals
-    $SIG{'HUP'} = 'IGNORE';
+    my $self = shift;
     
-    POSIX::setsid;  # set session id
+    return unless $self->is_daemon;
+    
+    (POSIX::setsid)  # set session id
+        || confess "Cannot detach from controlling process";   
+        
     chdir '/';      # change to root directory
     umask 0;        # clear the file creation mask            
     
@@ -29,15 +40,28 @@ sub daemon_detach {
     POSIX::close($_) foreach (0 .. $openmax);
 
     open(STDIN,  "+>/dev/null");
-    open(STDOUT, "+>&STDIN");
-    open(STDERR, "+>&STDIN");    
+
+    if (my $stdout_file = $ENV{MX_DAEMON_STDOUT}) {
+        open STDOUT, ">", $stdout_file 
+            or confess "Could not redirect STDOUT to $stdout_file : $!";
+    }
+    else {
+        open(STDOUT, "+>&STDIN");
+    }
+
+    if (my $stderr_file = $ENV{MX_DAEMON_STDERR}) {    
+        open STDERR, ">", "ERR.txt"
+            or confess "Could not redirect STDERR to $stderr_file : $!";        
+    }
+    else {               
+        open(STDERR, "+>&STDIN");    
+    }
 }
 
 sub daemonize {
     my ($self) = @_;
-    return if $self->daemon_fork;
+    $self->daemon_fork; 
     $self->daemon_detach;
-    $self->is_daemon(1);
 }
 
 1;
@@ -53,14 +77,20 @@ MooseX::Daemonize::Core - provides a Role the core daemonization features
      
 =head1 DESCRIPTION
 
+=head2 Important Note
+
+This method with not exit the parent process for you, it only forks 
+and detaches your child (daemon) process. It is your responsibility 
+to exit the parent process in some way.
+
 =head1 ATTRIBUTES
 
 =over
 
-=item is_daemon Bool
+=item I<is_daemon (is => rw, isa => Bool)>
 
-If true, the process is the backgrounded process. This is useful for example
-in an after 'start' => sub { } block
+This attribute is used to signal if we are within the 
+daemon process or not. 
 
 =back
 
@@ -68,25 +98,48 @@ in an after 'start' => sub { } block
 
 =over
 
-=item daemon_fork()
+=item B<daemon_fork>
 
-=item daemon_detach()
+This forks off the child process to be daemonized. Just as with 
+the built in fork, it returns the child pid to the parent process, 
+0 to the child process. It will also set the is_daemon flag 
+appropriately.
 
-=item daemonize()
+=item B<daemon_detach>
 
-Calls C<Proc::Daemon::Init> to daemonize this process. 
+This detaches the new child process from the terminal by doing 
+the following things. If called from within the parent process
+(the is_daemon flag is set to false), then it will simply return
+and do nothing.
 
-=item setup_signals()
+=over 4
 
-Setup the signal handlers, by default it only sets up handlers for SIGINT and SIGHUP
+=item Becomes a session leader 
 
-=item handle_sigint()
+This detaches the program from the controlling terminal, it is 
+accomplished by calling POSIX::setsid.
 
-Handle a INT signal, by default calls C<$self->stop()>
+=item Changes the current working directory to "/"
 
-=item handle_sighup()
+This is standard daemon behavior, if you want a different working 
+directory then simply change it later in your daemons code. 
 
-Handle a HUP signal. By default calls C<$self->restart()>
+=item Clears the file creation mask.
+
+=item Closes all open file descriptors.
+
+=item Reopen STDERR, STDOUT & STDIN to /dev/null
+
+This behavior can be controlled slightly though the MX_DAEMON_STDERR 
+and MX_DAEMON_STDOUT environment variables. It will look for a filename
+in either of these variables and redirect STDOUT and/or STDERR to those
+files. This is useful for debugging and/or testing purposes.
+
+-back
+
+=item B<daemonize>
+
+This will simply call C<daemon_fork> followed by C<daemon_detach>.
 
 =item meta()
 
@@ -96,36 +149,13 @@ The C<meta()> method from L<Class::MOP::Class>
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-Obviously L<Moose>, and L<Proc::Daemon>
+L<Moose::Role>, L<POSIX>
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -135,27 +165,27 @@ L<http://rt.cpan.org>.
 
 =head1 SEE ALSO
 
-L<Proc::Daemon>, L<Daemon::Generic>, L<MooseX::Getopt>
+L<Proc::Daemon>
+
+This code is based B<HEAVILY> on L<Proc::Daemon>, we originally 
+depended on it, but we needed some more flexibility, so instead
+we just stole the code. 
 
 =head1 AUTHOR
 
-Chris Prather  C<< <perigrin@cpan.org> >>
+Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 THANKS
-
-Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the 
-#moose denzians
-
-Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
 Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
 reserved.
 
+Portions heavily borrowed from L<Proc::Daemon> which is copyright Earl Hood.
+
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
