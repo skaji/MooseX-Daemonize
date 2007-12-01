@@ -17,7 +17,7 @@ sub daemon_fork {
         return $pid;
     }
     else {
-        $self->is_deamon(1);
+        $self->is_daemon(1);
         return;
     }
 }
