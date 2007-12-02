@@ -6,7 +6,7 @@ Revision history for MooseX-Daemonize
         process
       - Added stop_timeout to allow user to control timings.
     
-    * MooseX::Daemonize::PidFile
+    * MooseX::Daemonize::Pid::File
       - added this package to replace the File::Pid stuff (stevan)
         - added tests for this (stevan)
 

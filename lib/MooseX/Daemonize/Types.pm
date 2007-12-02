@@ -2,15 +2,15 @@ package MooseX::Daemonize::Types;
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Path::Class;
-use MooseX::Daemonize::PidFile; # need this for the coercion below
+use MooseX::Daemonize::Pid::File; # need this for the coercion below
 
 our $VERSION = 0.01;
 
-coerce 'MooseX::Daemonize::PidFile' 
+coerce 'MooseX::Daemonize::Pid::File' 
     => from 'Str' 
-        => via { MooseX::Daemonize::PidFile->new( file => $_ ) }
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }
     => from 'Path::Class::File' 
-        => via { MooseX::Daemonize::PidFile->new( file => $_ ) };
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) };
 
 1;
 

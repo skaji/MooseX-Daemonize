@@ -1,8 +1,6 @@
-package MooseX::Daemonize::PidFile;
+package MooseX::Daemonize::Pid;
 use strict;    # because Kwalitee is pedantic
 use Moose;
-
-use MooseX::Daemonize::Types;
 
 our $VERSION = '0.01';
 
@@ -10,35 +8,10 @@ has 'pid' => (
     is      => 'rw',
     isa     => 'Int',
     lazy    => 1,
-    default => sub { 
-        my $self = shift;
-        $self->does_file_exist
-            ? $self->file->slurp(chomp => 1)
-            : $$
-    }
+    default => sub { $$ }
 );
 
-has 'file' => (
-    is       => 'ro',
-    isa      => 'Path::Class::File',
-    coerce   => 1,
-    required => 1,
-    handles  => [ 'remove' ]
-);
-
-sub does_file_exist { -s (shift)->file }
-
-sub write {
-    my $self = shift;
-    $self->file->openw->print($self->pid);
-}
-
-sub running {
-    my $self = shift;
-    $self->does_file_exist
-        ? (kill(0, $self->pid) ? 1 : 0)
-        : 0;
-}
+sub is_running { kill(0, (shift)->pid) ? 1 : 0 }
 
 1;
 
@@ -48,7 +21,7 @@ __END__
 
 =head1 NAME
 
-MooseX::Daemonize::PidFile - PID file management for MooseX::Daemonize
+MooseX::Daemonize::Pid - PID management for MooseX::Daemonize
 
 =head1 SYNOPSIS
      
@@ -60,21 +33,13 @@ MooseX::Daemonize::PidFile - PID file management for MooseX::Daemonize
 
 =item pid Int
 
-=item file Path::Class::File | Str
-
 =back
 
 =head1 METHODS 
 
 =over
 
-=item remove
-
-=item write
-
-=item does_file_exist
-
-=item running
+=item is_running
 
 =item meta()
 

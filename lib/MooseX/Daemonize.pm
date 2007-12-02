@@ -60,25 +60,19 @@ sub init_pidfile {
     my $self = shift;
     my $file = $self->pidbase . '/' . $self->progname . '.pid';
     confess "Cannot write to $file" unless (-e $file ? -w $file : -w $self->pidbase);
-    MooseX::Daemonize::PidFile->new( file => $file );
+    MooseX::Daemonize::Pid::File->new( file => $file );
 }
 
 sub start {
     my ($self) = @_;
     
-    confess "instance already running" if $self->pidfile->running;
+    confess "instance already running" if $self->pidfile->is_running;
     
     $self->daemonize unless $self->foreground;
 
     return unless $self->is_daemon;
 
     $self->pidfile->pid($$);
-
-    # Avoid 'stdin reopened for output' warning with newer perls
-    ## no critic
-    open( NULL, '/dev/null' );
-    <NULL> if (0);
-    ## use critic
 
     # Change to basedir
     chdir $self->basedir;
@@ -208,7 +202,7 @@ The name of our daemon, defaults to $self->meta->name =~ s/::/_/;
 
 The base for our bid, defaults to /var/run/$progname
 
-=item pidfile MooseX::Daemonize::PidFile | Str
+=item pidfile MooseX::Daemonize::Pid::File | Str
 
 The file we store our PID in, defaults to /var/run/$progname
 

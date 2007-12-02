@@ -7,14 +7,14 @@ use Test::More tests => 25;
 use Test::Exception;
 
 BEGIN {
-    use_ok('MooseX::Daemonize::PidFile');
+    use_ok('MooseX::Daemonize::Pid::File');
 }
 
 {
-    my $f = MooseX::Daemonize::PidFile->new(
+    my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'foo.pid' ]
     );
-    isa_ok($f, 'MooseX::Daemonize::PidFile');
+    isa_ok($f, 'MooseX::Daemonize::Pid::File');
 
     isa_ok($f->file, 'Path::Class::File');
 
@@ -26,7 +26,7 @@ BEGIN {
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
     
-    ok($f->running, '... it is running too');
+    ok($f->is_running, '... it is running too');
 
     lives_ok {
         $f->remove
@@ -36,10 +36,10 @@ BEGIN {
 }
 
 {
-    my $f = MooseX::Daemonize::PidFile->new(
+    my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'bar.pid' ]
     );
-    isa_ok($f, 'MooseX::Daemonize::PidFile');
+    isa_ok($f, 'MooseX::Daemonize::Pid::File');
 
     isa_ok($f->file, 'Path::Class::File');
 
@@ -50,7 +50,7 @@ BEGIN {
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
     is($f->pid, $$, '... the PID is our current process');
     
-    ok($f->running, '... it is running too');    
+    ok($f->is_running, '... it is running too');    
 
     lives_ok {
         $f->remove
@@ -62,11 +62,11 @@ BEGIN {
 {
     my $PID = 2001;
     
-    my $f = MooseX::Daemonize::PidFile->new(
+    my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'baz.pid' ],
         pid  => $PID,
     );
-    isa_ok($f, 'MooseX::Daemonize::PidFile');
+    isa_ok($f, 'MooseX::Daemonize::Pid::File');
 
     isa_ok($f->file, 'Path::Class::File');
     
@@ -78,7 +78,7 @@ BEGIN {
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
 
-    ok(!$f->running, '... it is not running (cause we made the PID up)');
+    ok(!$f->is_running, '... it is not running (cause we made the PID up)');
 
     lives_ok {
         $f->remove

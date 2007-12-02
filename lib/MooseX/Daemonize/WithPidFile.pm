@@ -3,14 +3,14 @@ use strict;
 use Moose::Role;
 
 use MooseX::Daemonize::Types;
-use MooseX::Daemonize::PidFile;
+use MooseX::Daemonize::Pid::File;
 
 our $VERSION = 0.01;
 
 requires 'init_pidfile';
 
 has pidfile => (
-    isa       => 'MooseX::Daemonize::PidFile',
+    isa       => 'MooseX::Daemonize::Pid::File',
     is        => 'rw',
     lazy      => 1,
     required  => 1,
