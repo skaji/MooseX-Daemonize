@@ -6,8 +6,6 @@ use MooseX::Types::Path::Class;
 our $VERSION = 0.05;
 
 with qw[
-    MooseX::Daemonize::Core
-    MooseX::Daemonize::WithSignalHandling
     MooseX::Daemonize::WithPidFile    
     MooseX::Getopt
 ];
@@ -68,11 +66,6 @@ sub start {
     confess "instance already running" if $self->pidfile->is_running;
     
     $self->daemonize unless $self->foreground;
-
-    # make sure to clear the PID 
-    # so that a bad value doesn't
-    # stick around in the parent
-    $self->pidfile->clear_pid;
     
     return unless $self->is_daemon;
 
@@ -109,10 +102,10 @@ sub restart {
     $self->start();
 }
 
-sub handle_signal {
-    my ($self, $signal) = @_;
-    return $self->handle_sigint if $signal eq 'INT';
-    return $self->handle_sighup if $signal eq 'HUP';    
+sub setup_signals {
+    my $self = shift;
+    $SIG{'INT'} = sub { $self->handle_sigint };
+    $SIG{'HUP'} = sub { $self->handle_sighup };    
 }
 
 sub handle_sigint { $_[0]->stop; }

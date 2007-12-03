@@ -15,6 +15,8 @@ BEGIN {
     use_ok('MooseX::Daemonize::Pid');    
 }
 
+use constant DEBUG => 0;
+
 my $CWD                = Cwd::cwd;
 $ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
 $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
@@ -77,17 +79,21 @@ isa_ok($p, 'MooseX::Daemonize::Pid');
 ok($p->is_running, '... the daemon process is running (' . $p->pid . ')');
 
 my $pid = $p->pid;
-diag `ps $pid`;
-diag "-------";
-diag `ps -x | grep test-app`;
-diag "-------";
-diag "killing $pid";
+if (DEBUG) {
+    diag `ps $pid`;
+    diag "-------";
+    diag `ps -x | grep test-app`;
+    diag "-------";
+    diag "killing $pid";
+}
 kill INT => $p->pid;
-diag "killed $pid";
+diag "killed $pid" if DEBUG;
 sleep(2);
-diag `ps $pid`;
-diag "-------";
-diag `ps -x | grep test-app`;
+if (DEBUG) {
+    diag `ps $pid`;
+    diag "-------";
+    diag `ps -x | grep test-app`;
+}
 
 ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . ')');
 

@@ -27,7 +27,7 @@ our $Test = Test::Builder->new;
 
 sub daemonize_ok {
     my ( $daemon, $msg ) = @_;
-    unless ( my $pid = Proc::Daemon::Fork ) {
+    unless ( my $pid = fork ) {
         $daemon->start();
         exit;
     }

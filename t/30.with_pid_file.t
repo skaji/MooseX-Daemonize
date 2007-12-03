@@ -14,6 +14,8 @@ BEGIN {
     use_ok('MooseX::Daemonize::Core');  
 }
 
+use constant DEBUG => 0;
+
 my $CWD                = Cwd::cwd;
 my $PIDFILE            = catfile($CWD, 'test-app.pid');
 $ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
@@ -23,8 +25,7 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
     package MyFooDaemon;
     use Moose;
     
-    with 'MooseX::Daemonize::Core', 
-         'MooseX::Daemonize::WithPidFile';
+    with 'MooseX::Daemonize::WithPidFile';
          
     sub init_pidfile {
         MooseX::Daemonize::Pid::File->new( file => $PIDFILE )
@@ -32,6 +33,10 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
     
     sub start {
         my $self = shift;
+        
+        # this tests our bad PID 
+        # cleanup functionality.
+        print "Our parent PID is " . $self->pidfile->pid . "\n";
         
         $self->daemonize;
         return unless $self->is_daemon;
@@ -82,17 +87,21 @@ ok($p->does_file_exist, '... the PID file exists');
 ok($p->is_running, '... the daemon process is running (' . $p->pid . ')');
 
 my $pid = $p->pid;
-diag `ps $pid`;
-diag "-------";
-diag `ps -x | grep test-app`;
-diag "-------";
-diag "killing $pid";
+if (DEBUG) {
+    diag `ps $pid`;
+    diag "-------";
+    diag `ps -x | grep test-app`;
+    diag "-------";
+    diag "killing $pid";
+}
 kill INT => $p->pid;
-diag "killed $pid";
+diag "killed $pid" if DEBUG;
 sleep(2);
-diag `ps $pid`;
-diag "-------";
-diag `ps -x | grep test-app`;
+if (DEBUG) {
+    diag `ps $pid`;
+    diag "-------";
+    diag `ps -x | grep test-app`;
+}
 
 ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . ')');
 ok(!(-e $PIDFILE), '... the PID file has been removed');
