@@ -14,7 +14,11 @@ use MooseX::Daemonize;
 
     has filename => ( isa => 'Str', is => 'ro' );
     
-    after start => sub { $_[0]->create_file( $_[0]->filename ) };
+    after start => sub { 
+        my $self = shift;
+        $self->create_file( $self->filename ) 
+            if $self->is_daemon;
+    };
 
     sub create_file {
         my ( $self, $file ) = @_;

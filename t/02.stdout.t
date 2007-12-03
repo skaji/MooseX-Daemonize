@@ -14,7 +14,8 @@ my $Test = Test::Builder->new;
 
     after start => sub {
         my ($self) = @_;
-        $self->output_ok();
+        $self->output_ok() 
+            if $self->is_daemon;
     };
 
     sub output_ok {
