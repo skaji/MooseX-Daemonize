@@ -6,6 +6,12 @@ Revision history for MooseX-Daemonize
         about undead process
       - Added stop_timeout to allow user to control timings.
       - Refactored to roles
+        - removed Proc::Daemon dependency
+        - removed File::Pid dependency
+      
+    * Test::MooseX::Daemonize
+      - updated docs 
+      - removed Proc::Daemon dependency
 
     * MooseX::Daemonize::Core
       - the core daemonization methods are here
@@ -24,14 +30,15 @@ Revision history for MooseX-Daemonize
         - added tests for this (stevan)
 
 0.04 2007-11-11
-    - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were stupid but I didn't realize it.
+    - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were 
+      stupid but I didn't realize it.
 
 0.03 2007-10-22
     - Add File::Slurp to dependencies so our tests pass better
 
 0.02 Sept 19, 2007
-    - Fixed bug where sometimes the pidfile is writeable but pidbase is not --  reported by dec 
-    - Fixed bug where the pidfile wasn't being updated properly --  reported by dec 
+    - Fixed bug where sometimes the pidfile is writeable but pidbase is not -- reported by dec 
+    - Fixed bug where the pidfile wasn't being updated properly -- reported by dec 
     - Added is_daemon attribute
     - Added another fork to make sure we short circuit out of the daemonize process properly
     - Switch to File::Pid

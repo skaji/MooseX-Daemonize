@@ -1,12 +1,11 @@
-use strict;
-
 package Test::MooseX::Daemonize;
-use Proc::Daemon;
+use strict;
 
 # BEGIN CARGO CULTING
 use Sub::Exporter;
 use Test::Builder;
-our $VERSION   = '0.02';
+
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
 {
@@ -33,7 +32,7 @@ sub daemonize_ok {
     }
     else {
         sleep(1);    # Punt on sleep time, 1 seconds should be enough
-        $Test->ok( -e $daemon->pidfile->file, $msg )
+        $Test->ok( $daemon->pidfile->does_file_exist, $msg )
           || $Test->diag(
             'Pidfile (' . $daemon->pidfile->file . ') not found.' );
     }
@@ -93,16 +92,15 @@ after daemonize => sub {
 1;
 __END__
 
+=pod
 
 =head1 NAME
 
-Test::MooseX::Daemonize - provides a Role that daemonizes your Moose based application.
-
+Test::MooseX::Daemonize - Tool to help test MooseX::Daemonize applications
 
 =head1 VERSION
 
 This document describes MooseX::Daemonize version 0.0.1
-
 
 =head1 SYNOPSIS
     
@@ -122,116 +120,34 @@ This document describes MooseX::Daemonize version 0.0.1
 
 =head1 DESCRIPTION
 
-Often you want to write a persistant daemon that has a pid file, and responds appropriately to Signals. 
-This module helps provide the basic infrastructure to do that.
+This module provides some basic Test::Builder compatible test methods to 
+use when writing tests for you MooseX::Daemonize based modules. 
 
-=head1 ATTRIBUTES
+=head1 EXPORTED FUNCTIONS
 
-=over
+=over 4
 
-=item progname Str
+=item B<daemonize_ok ( $daemon, ?$msg )>
 
-The name of our daemon, defaults to $0
+This will attempt to daemonize your C<$daemon> returning ok on 
+success and not ok on failure.
 
-=item pidbase Str
+=item B<check_test_output ( $daemon )>
 
-The base for our bid, defaults to /var/run/$progname
-
-=item pidfile Str
-
-The file we store our PID in, defaults to /var/run/$progname/ 
-
-=item foreground Bool
-
-If true, the process won't background. Useful for debugging. This option can be set via Getopt's -f.
+This is expected to be used with a C<$daemon> which does the 
+B<Test::MooseX::Daemonize::Testable> role (included in this package
+see the source for more info). It will collect the test output 
+from your daemon and apply it in the parent process by mucking 
+around with L<Test::Builder> stuff, again, read the source for 
+more info. If we get time we will document this more thoroughly.
 
 =back
-
-=head1 METHODS 
-
-=over
-
-=item check()
-
-Check to see if an instance is already running.
-
-=item start()
-
-Setup a pidfile, fork, then setup the signal handlers.
-
-=item stop()
-
-Stop the process matching the pidfile, and unlinks the pidfile.
-
-=item restart()
-
-Litterally 
-
-    $self->stop();
-    $self->start();
-
-=item daemonize()
-
-Calls C<Proc::Daemon::Init> to daemonize this process. 
-
-=item kill($pid)
-
-Kills the process for $pid. This will try SIGINT, and SIGTERM before falling back to SIGKILL and finally giving up.
-
-=item setup_signals()
-
-Setup the signal handlers, by default it only sets up handlers for SIGINT and SIGHUP
-
-=item handle_sigint()
-
-Handle a INT signal, by default calls C<$self->stop()>;
-
-=item handle_sighup()
-
-Handle a HUP signal. Nothing is done by default.
-
-=item meta()
-
-the C<meta()> method from L<Class::MOP::Class>
-
-=item daemonize_ok()
-
-=item check_test_output()
-
-=back
-
-=head1 DEPENDENCIES
-
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-Obviously L<Moose>, also L<Carp>, L<Proc::Daemon>, L<File::Flock>, L<File::Slurp>
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -241,12 +157,11 @@ L<http://rt.cpan.org>.
 
 =head1 SEE ALSO
 
-L<Proc::Daemon>, L<Daemon::Generic>, L<MooseX::Getopt>
+L<MooseX::Daemonize>
 
 =head1 AUTHOR
 
 Chris Prather  C<< <perigrin@cpan.org> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
@@ -254,7 +169,6 @@ Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserve
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
@@ -278,3 +192,5 @@ RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
 FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
+
+=cut

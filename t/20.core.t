@@ -97,4 +97,7 @@ if (DEBUG) {
 
 ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . ')');
 
+unlink $ENV{MX_DAEMON_STDOUT};
+unlink $ENV{MX_DAEMON_STDERR};
+
 

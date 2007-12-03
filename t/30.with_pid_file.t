@@ -104,3 +104,5 @@ if (DEBUG) {
 ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . ')');
 ok(!(-e $PIDFILE), '... the PID file has been removed');
 
+unlink $ENV{MX_DAEMON_STDOUT};
+unlink $ENV{MX_DAEMON_STDERR};
