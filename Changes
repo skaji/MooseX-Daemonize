@@ -10,13 +10,10 @@ Revision history for MooseX-Daemonize
     * MooseX::Daemonize::Core
       - the core daemonization methods are here
         - added tests for this
-      
-    * MooseX::Daemonize::WithSignalHandling
-      - the SIG handling is here
 
     * MooseX::Daemonize::WithPidFile
-      - the PID file handling is here, and 
-        delegates to the classes below
+      - the PID file handling is added to the core here
+        - added tests for this
 
     * MooseX::Daemonize::Pid
       - added this package to replace the File::Pid stuff
