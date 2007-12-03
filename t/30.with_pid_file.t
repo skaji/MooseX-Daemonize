@@ -41,8 +41,6 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
         $self->daemonize;
         return unless $self->is_daemon;
         
-        $self->pidfile->write;
-        
         # make it easy to find with ps
         $0 = 'test-app';
         $SIG{INT} = sub { 

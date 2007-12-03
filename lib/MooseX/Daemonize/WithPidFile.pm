@@ -21,11 +21,13 @@ has pidfile => (
 );
 
 after 'daemonize' => sub {
+    my $self = shift;
     # NOTE:
     # make sure that we do not have 
     # any bad PID values stashed around
     # - SL
-    (shift)->pidfile->clear_pid
+    $self->pidfile->clear_pid;
+    $self->pidfile->write if $self->is_daemon;
 };
 
 1;
