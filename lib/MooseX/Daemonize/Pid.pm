@@ -29,24 +29,37 @@ __END__
 =head1 NAME
 
 MooseX::Daemonize::Pid - PID management for MooseX::Daemonize
-
-=head1 SYNOPSIS
      
 =head1 DESCRIPTION
 
+This is a very basic Pid management object, it doesn't do all that 
+much, and mostly just serves as a base class for L<MooseX::Daemonize::Pid::File>.
+
 =head1 ATTRIBUTES
 
-=over
+=over 4
 
-=item pid Int
+=item I<pid Int>
 
 =back
 
 =head1 METHODS 
 
-=over
+=over 4
 
-=item is_running
+=item B<clear_pid>
+
+This will clear the value of the I<pid> attribute. It is useful for making sure
+that the parent process does not have a bad value stored in it.
+
+=item B<has_pid>
+
+This is a predicate method to tell you if your I<pid> attribute has 
+been initialized yet.
+
+=item B<is_running>
+
+This checks to see if the I<pid> is running.
 
 =item meta()
 
@@ -81,7 +94,6 @@ reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 

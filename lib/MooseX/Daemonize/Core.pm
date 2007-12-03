@@ -1,4 +1,6 @@
 package MooseX::Daemonize::Core;
+use strict;         # cause Perl::Critic errors are annoying
+use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 
 our $VERSION = 0.01;
@@ -6,9 +8,14 @@ our $VERSION = 0.01;
 use POSIX ();
 
 has is_daemon => (
-    isa     => 'Bool',
-    is      => 'rw',
-    default => sub { 0 },
+    # NOTE:
+    # this should never be accessible
+    # from the command line
+    # - SL
+    metaclass => 'NoGetopt',
+    isa       => 'Bool',
+    is        => 'rw',
+    default   => sub { 0 },
 );
 
 sub daemon_fork {
@@ -51,23 +58,42 @@ sub daemon_detach {
     # close them all
     POSIX::close($_) foreach (0 .. $openmax);
 
-    open(STDIN, "+>/dev/null");
+    # fixup STDIN ...
+
+    open(STDIN, "+>/dev/null")
+        or confess "Could not redirect STDOUT to /dev/null";
+
+    # fixup STDOUT ...
 
     if (my $stdout_file = $ENV{MX_DAEMON_STDOUT}) {
         open STDOUT, ">", $stdout_file
             or confess "Could not redirect STDOUT to $stdout_file : $!";
     }
     else {
-        open(STDOUT, "+>&STDIN");
+        open(STDOUT, "+>&STDIN")
+            or confess "Could not redirect STDOUT to /dev/null";
     }
+
+    # fixup STDERR ...
 
     if (my $stderr_file = $ENV{MX_DAEMON_STDERR}) {
         open STDERR, ">", "ERR.txt"
             or confess "Could not redirect STDERR to $stderr_file : $!";
     }
     else {
-        open(STDERR, "+>&STDIN");
-    }  
+        open(STDERR, "+>&STDIN")
+            or confess "Could not redirect STDERR to /dev/null";        ;
+    }
+
+    # do a little house cleaning ...
+
+    # Avoid 'stdin reopened for output'
+    # warning with newer perls
+    open( NULL, '/dev/null' );
+    <NULL> if (0);
+
+    # return success
+    return 1;
 }
 
 sub daemonize {
@@ -90,9 +116,9 @@ MooseX::Daemonize::Core - A Role with the core daemonization features
 
   package My::Daemon;
   use Moose;
-  
+
   with 'MooseX::Daemonize::Core';
-  
+
   sub start {
       my $self = shift;
       # daemonize me ...
@@ -104,7 +130,7 @@ MooseX::Daemonize::Core - A Role with the core daemonization features
 
 =head1 DESCRIPTION
 
-This is the basic daemonization Role, it provides a few methods (see 
+This is the basic daemonization Role, it provides a few methods (see
 below) and the minimum features needed to properly daemonize your code.
 
 =head2 Important Notes
@@ -113,8 +139,8 @@ None of the methods in this role will exit the parent process for you,
 it only forks and detaches your child (daemon) process. It is your
 responsibility to exit the parent process in some way.
 
-There is no PID or PID file management in this role, that is your 
-responsibility (see some of the other roles in this distro for that). 
+There is no PID or PID file management in this role, that is your
+responsibility (see some of the other roles in this distro for that).
 
 =head1 ATTRIBUTES
 
@@ -184,7 +210,7 @@ and MX_DAEMON_STDOUT environment variables. It will look for a filename
 in either of these variables and redirect STDOUT and/or STDERR to those
 files. This is useful for debugging and/or testing purposes.
 
--back
+=back
 
 The C<%options> available for this function are:
 
@@ -225,8 +251,8 @@ The C<meta()> method from L<Class::MOP::Class>
 =item Note about double fork
 
 Taken from L<http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66012>
-in a comment entitled I<The second fork _is_ necessary by Jonathan Bartlett>, 
-it is not the definitive statement on the issue, but it's clear and well 
+in a comment entitled I<The second fork _is_ necessary by Jonathan Bartlett>,
+it is not the definitive statement on the issue, but it's clear and well
 written enough so I decided to reproduce it here.
 
   The first fork accomplishes two things - allow the shell to return,
@@ -255,8 +281,8 @@ free to specify otherwise using the C<%options>.
 =item Note about zombies
 
 Doing the double fork (see above) tends to get rid of your zombies since
-by the time you have double forked your daemon process is then owned by 
-the init process. However, sometimes the double-fork is more than you 
+by the time you have double forked your daemon process is then owned by
+the init process. However, sometimes the double-fork is more than you
 really need, and you want to keep your daemon processes a little closer
 to you. In this case you have to watch out for zombies, you can avoid then
 by just setting the C<ignore_zombies> option (see above).
@@ -265,9 +291,9 @@ by just setting the C<ignore_zombies> option (see above).
 
 =head1 ENVIRONMENT VARIABLES
 
-These variables are best just used for debugging and/or testing, but 
-not used for actual logging. For that, you should reopen STDOUT/ERR on 
-your own. 
+These variables are best just used for debugging and/or testing, but
+not used for actual logging. For that, you should reopen STDOUT/ERR on
+your own.
 
 =over 4
 

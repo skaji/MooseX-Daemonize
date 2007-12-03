@@ -2,15 +2,31 @@ package MooseX::Daemonize::Pid::File;
 use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
-use MooseX::Types::Path::Class;
 
+our $VERSION = '0.01';
+
+use MooseX::Types::Path::Class;
+use MooseX::Getopt::OptionTypeMap;
+
+# NOTE:
+# set up some basic coercions
+# that will come in handy
+# - SL
 coerce 'MooseX::Daemonize::Pid::File' 
     => from 'Str' 
         => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }
+    => from 'ArrayRef' 
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }        
     => from 'Path::Class::File' 
         => via { MooseX::Daemonize::Pid::File->new( file => $_ ) };
-
-our $VERSION = '0.01';
+ 
+# NOTE:
+# make sure this class plays 
+# well with MooseX::Getopt
+# - SL
+MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
+    'MooseX::Daemonize::Pid::File' => '=s',
+);
 
 extends 'MooseX::Daemonize::Pid';
 
@@ -54,16 +70,29 @@ __END__
 =head1 NAME
 
 MooseX::Daemonize::Pid::File - PID file management for MooseX::Daemonize
-
-=head1 SYNOPSIS
      
 =head1 DESCRIPTION
+
+This object extends L<MooseX::Daemonize::Pid> to add persistence in a Pidfile.
+
+This class sets up some basic coercion routines for itself so that it can 
+be created from a I<Str> (a file name), I<ArrayRef> (an array of path components
+for a filename) or a I<Path::Class::File> object. 
+
+This class registers it's type with L<MooseX::Getopt> as well, and is expected
+to be passed on the command line as a string (which will then go through the 
+coercion routines mentioned above).
 
 =head1 ATTRIBUTES
 
 =over
 
-=item file Path::Class::File | Str
+=item I<pid Int>
+
+This is inherited from L<MooseX:Daemonize::Pid> and extended here to 
+get it's default value from the Pidfile (if available).
+
+=item I<file Path::Class::File | Str>
 
 =back
 
@@ -71,13 +100,29 @@ MooseX::Daemonize::Pid::File - PID file management for MooseX::Daemonize
 
 =over
 
-=item remove
+=item B<clear_pid>
 
-=item write
+=item B<has_pid>
 
-=item does_file_exist
+Both of these methods are inherited from L<MooseX:Daemonize::Pid> see that 
+module for more information.
 
-=item is_running
+=item B<remove>
+
+This removes the Pidfile.
+
+=item B<write>
+
+This writes the Pidfile.
+
+=item B<does_file_exist>
+
+This checks if the Pidfile exists.
+
+=item B<is_running>
+
+This checks if the Pidfile exists, if it does it checks to see if the process
+is running, if the Pidfile doesn't exist, it returns false.
 
 =item meta()
 

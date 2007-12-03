@@ -5,38 +5,39 @@ use MooseX::Types::Path::Class;
 
 our $VERSION = 0.05;
 
-with qw[
-    MooseX::Daemonize::WithPidFile    
-    MooseX::Getopt
-];
+with 'MooseX::Daemonize::WithPidFile',
+     'MooseX::Getopt';
 
 has progname => (
-    isa      => 'Str',
-    is       => 'ro',
-    lazy     => 1,
-    required => 1,
-    default  => sub {
+    metaclass => 'Getopt',    
+    isa       => 'Str',
+    is        => 'ro',
+    lazy      => 1,
+    required  => 1,
+    default   => sub {
         ( my $name = lc $_[0]->meta->name ) =~ s/::/_/g;
         return $name;
     },
 );
 
 has pidbase => (
-    isa      => 'Path::Class::Dir',
-    is       => 'ro',
-    coerce   => 1,
-    required => 1,    
-    lazy     => 1,
-    default  => sub { Path::Class::Dir->new('var', 'run') },
+    metaclass => 'Getopt',    
+    isa       => 'Path::Class::Dir',
+    is        => 'ro',
+    coerce    => 1,
+    required  => 1,    
+    lazy      => 1,
+    default   => sub { Path::Class::Dir->new('var', 'run') },
 );
 
 has basedir => (
-    isa      => 'Path::Class::Dir',
-    is       => 'ro',
-    coerce   => 1,
-    required => 1,
-    lazy     => 1,
-    default  => sub { Path::Class::Dir->new('/') },
+    metaclass => 'Getopt',    
+    isa       => 'Path::Class::Dir',
+    is        => 'ro',
+    coerce    => 1,
+    required  => 1,
+    lazy      => 1,
+    default   => sub { Path::Class::Dir->new('/') },
 );
 
 has foreground => (
@@ -48,10 +49,15 @@ has foreground => (
 );
 
 has stop_timeout => (
-    isa     => 'Int',
-    is      => 'rw',
-    default => sub { 2 }
+    metaclass => 'Getopt',    
+    isa       => 'Int',
+    is        => 'rw',
+    default   => sub { 2 }
 );
+
+# methods ...
+
+## PID file related stuff ...
 
 sub init_pidfile {
     my $self = shift;
@@ -59,6 +65,25 @@ sub init_pidfile {
     confess "Cannot write to $file" unless (-e $file ? -w $file : -w $self->pidbase);
     MooseX::Daemonize::Pid::File->new( file => $file );
 }
+
+# backwards compat, 
+sub check      { (shift)->pidfile->is_running }
+sub save_pid   { (shift)->pidfile->write      }
+sub remove_pid { (shift)->pidfile->remove     }
+sub get_pid    { (shift)->pidfile->pid        }
+
+## signal handling ...
+
+sub setup_signals {
+    my $self = shift;
+    $SIG{'INT'} = sub { $self->handle_sigint };
+    $SIG{'HUP'} = sub { $self->handle_sighup };    
+}
+
+sub handle_sigint { $_[0]->stop; }
+sub handle_sighup { $_[0]->restart; }
+
+## daemon control methods ...
 
 sub start {
     my ($self) = @_;
@@ -69,12 +94,7 @@ sub start {
     
     return unless $self->is_daemon;
 
-    $self->pidfile->pid($$);
-    
-    # Avoid 'stdin reopened for output'
-    # warning with newer perls
-    open( NULL, '/dev/null' );
-    <NULL> if (0);    
+    $self->pidfile->pid($$);   
 
     # Change to basedir
     chdir $self->basedir;
@@ -82,6 +102,12 @@ sub start {
     $self->pidfile->write;
     $self->setup_signals;
     return $$;
+}
+
+sub restart {
+    my ($self) = @_;
+    $self->stop( no_exit => 1 );
+    $self->start();
 }
 
 # Make _kill *really* private
@@ -95,21 +121,6 @@ sub stop {
     return 1 if $args{no_exit};
     exit;
 }
-
-sub restart {
-    my ($self) = @_;
-    $self->stop( no_exit => 1 );
-    $self->start();
-}
-
-sub setup_signals {
-    my $self = shift;
-    $SIG{'INT'} = sub { $self->handle_sigint };
-    $SIG{'HUP'} = sub { $self->handle_sighup };    
-}
-
-sub handle_sigint { $_[0]->stop; }
-sub handle_sighup { $_[0]->restart; }
 
 $_kill = sub {
     my ( $self, $pid ) = @_;
@@ -165,102 +176,161 @@ application.
 
 =head1 VERSION
 
-This document describes MooseX::Daemonize version 0.04
+This document describes MooseX::Daemonize version 0.05
 
 =head1 SYNOPSIS
 
-    package FileMaker;
+    package My::Daemon;
     use Moose;
-    with qw(MooseX::Daemonize);
-
-    sub create_file {
-        my ( $self, $file ) = @_;
-        open( FILE, ">$file" ) || die;
-        close(FILE);
-    }
-
-    no Moose;
-
-    # then in the main package ... 
     
-    my $daemon = FileMaker->new();
-    $daemon->start();
-    $daemon->create_file($file);
-    $daemon->stop();
+    with qw(MooseX::Daemonize);
+    
+    # ... define your class ....
+    
+    after start => sub { 
+        my $self = shift;
+        return unless $self->is_daemon;
+        # your daemon code here ...
+    };
+
+    # then in your script ... 
+    
+    my $daemon = My::Daemon->new_with_options();
+    
+    my ($command) = @{$daemon->extra_argv}
+    defined $command || die "No command specified";
+    
+    $daemon->start() if $command eq 'start';
+    $daemon->stop()  if $command eq 'stop';
      
 =head1 DESCRIPTION
 
 Often you want to write a persistant daemon that has a pid file, and responds
-appropriately to Signals.  This module helps provide the basic infrastructure
-to do that.
+appropriately to Signals. This module provides a set of basic roles as an  
+infrastructure to do that.
 
 =head1 ATTRIBUTES
 
+This list includes attributes brought in from other roles as well
+we include them here for ease of documentation. All of these attributes
+are settable though L<MooseX::Getopt>'s command line handling, with the 
+exception of C<is_daemon>.
+
 =over
 
-=item progname Path::Class::Dir | Str
+=item I<progname Path::Class::Dir | Str>
 
-The name of our daemon, defaults to $self->meta->name =~ s/::/_/;
+The name of our daemon, defaults to C<$package_name =~ s/::/_/>;
 
-=item pidbase Path::Class::Dir | Str
+=item I<pidbase Path::Class::Dir | Str>
 
-The base for our bid, defaults to /var/run/$progname
+The base for our bid, defaults to C</var/run/$progname>
 
-=item pidfile MooseX::Daemonize::Pid::File | Str
+=item I<pidfile MooseX::Daemonize::Pid::File | Str>
 
-The file we store our PID in, defaults to /var/run/$progname
+The file we store our PID in, defaults to C</var/run/$progname>
 
-=item foreground Bool
+=item I<foreground Bool>
 
 If true, the process won't background. Useful for debugging. This option can 
 be set via Getopt's -f.
 
-=item is_daemon Bool
+=item I<is_daemon Bool>
 
-If true, the process is the backgrounded process. This is useful for example
-in an after 'start' => sub { } block
+If true, the process is the backgrounded daemon process, if false it is the 
+parent process. This is useful for example in an C<after 'start' => sub { }> 
+block. 
 
-=item stop_timeout
+B<NOTE:> This option is explicitly B<not> available through L<MooseX::Getopt>.
+
+=item I<stop_timeout>
 
 Number of seconds to wait for the process to stop, before trying harder to kill
-it. Defaults to 2 seconds
+it. Defaults to 2 seconds.
 
 =back
 
 =head1 METHODS 
 
-=over
+=head2 Daemon Control Methods
 
-=item start()
+These methods can be used to control the daemon behavior. Every effort 
+has been made to have these methods DWIM (Do What I Mean), so that you 
+can focus on just writing the code for your daemon. 
+
+Extending these methods is best done with the L<Moose> method modifiers, 
+such as C<before>, C<after> and C<around>.
+
+=over 4
+
+=item B<start>
 
 Setup a pidfile, fork, then setup the signal handlers.
 
-=item stop()
+=item B<stop>
 
 Stop the process matching the pidfile, and unlinks the pidfile.
 
-=item restart()
+=item B<restart>
 
-Litterally 
+Literally this is:
 
     $self->stop();
     $self->start();
 
-=item daemonize()
+=back
 
-Calls daemonize from MooseX::Daemonize::Core.
+=head2 Pidfile Handling Methods
 
-=item setup_signals()
+=over 4
 
-Setup the signal handlers, by default it only sets up handlers for SIGINT and SIGHUP
+=item B<init_pidfile>
 
-=item handle_sigint()
+This method will create a L<MooseX::Daemonize::Pid::File> object and tell
+it to store the PID in the file C<$pidbase/$progname.pid>.
+
+=item B<check>
+
+This checks to see if the daemon process is currently running by checking 
+the pidfile.
+
+=item B<get_pid>
+
+Returns the PID of the daemon process.
+
+=item B<save_pid>
+
+Write the pidfile.
+
+=item B<remove_pid>
+
+Removes the pidfile.
+
+=back
+
+=head2 Signal Handling Methods
+
+=over 4
+
+=item B<setup_signals>
+
+Setup the signal handlers, by default it only sets up handlers for SIGINT and 
+SIGHUP. If you wish to add more signals just use the C<after> method modifier
+and add them.
+
+=item B<handle_sigint>
 
 Handle a INT signal, by default calls C<$self->stop()>
 
-=item handle_sighup()
+=item B<handle_sighup>
 
 Handle a HUP signal. By default calls C<$self->restart()>
+
+=back
+
+=head2 Introspection
+
+=over 4
 
 =item meta()
 
@@ -270,36 +340,13 @@ The C<meta()> method from L<Class::MOP::Class>
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-Obviously L<Moose>, and L<Proc::Daemon>
+L<Moose>, L<MooseX::Getopt>, L<MooseX::Types::Path::Class> and L<POSIX>
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
-None reported.
-
+None reported. Although obviously this will not work on Windows.
 
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -309,7 +356,7 @@ L<http://rt.cpan.org>.
 
 =head1 SEE ALSO
 
-L<Proc::Daemon>, L<Daemon::Generic>, L<MooseX::Getopt>
+L<Proc::Daemon>, L<Daemon::Generic>
 
 =head1 AUTHOR
 
@@ -329,7 +376,6 @@ reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
