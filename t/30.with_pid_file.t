@@ -11,11 +11,11 @@ use Test::Exception;
 use Test::Moose;
 
 BEGIN {
-    use_ok('MooseX::Daemonize::Core');
-    use_ok('MooseX::Daemonize::Pid');    
+    use_ok('MooseX::Daemonize::Core');  
 }
 
 my $CWD                = Cwd::cwd;
+my $PIDFILE            = catfile($CWD, 'test-app.pid');
 $ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
 $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
 
@@ -23,36 +23,26 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
     package MyFooDaemon;
     use Moose;
     
-    with 'MooseX::Daemonize::Core';
-    
-    has 'daemon_pid' => (is => 'rw', isa => 'MooseX::Daemonize::Pid');
-    
-    # capture the PID from the fork
-    around 'daemon_fork' => sub {
-        my $next = shift;
-        my $self = shift;
-        if (my $pid = $self->$next(@_)) {
-            $self->daemon_pid(
-                MooseX::Daemonize::Pid->new(pid => $pid)
-            );
-        }
-    };
+    with 'MooseX::Daemonize::Core', 
+         'MooseX::Daemonize::WithPidFile';
+         
+    sub init_pidfile {
+        MooseX::Daemonize::Pid::File->new( file => $PIDFILE )
+    }
     
     sub start {
-        my $self = shift;  
-        # tell it to ignore zombies ...
-        $self->daemonize(
-            ignore_zombies => 1,
-            no_double_fork => 1,
-        );
+        my $self = shift;
+        
+        $self->daemonize;
         return unless $self->is_daemon;
-        # change to our local dir
-        # so that we can debug easier
-        chdir $CWD;
+        
+        $self->pidfile->write;
+        
         # make it easy to find with ps
         $0 = 'test-app';
         $SIG{INT} = sub { 
             print "Got INT! Oh Noes!"; 
+            $self->pidfile->remove;
             exit;
         };      
         while (1) {
@@ -63,17 +53,32 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
     }
 }
 
-my $d = MyFooDaemon->new;
+my $d = MyFooDaemon->new( pidfile => $PIDFILE );
 isa_ok($d, 'MyFooDaemon');
 does_ok($d, 'MooseX::Daemonize::Core');
+does_ok($d, 'MooseX::Daemonize::WithPidFile');
+
+ok($d->has_pidfile, '... we have a pidfile value');
+
+{
+    my $p = $d->pidfile;
+    isa_ok($p, 'MooseX::Daemonize::Pid::File');
+    #diag $p->dump;
+}
+
+ok(!(-e $PIDFILE), '... the PID file does not exist yet');
 
 lives_ok {
     $d->start;
 } '... successfully daemonized from (' . $$ . ')';
 
-my $p = $d->daemon_pid;
-isa_ok($p, 'MooseX::Daemonize::Pid');
+my $p = $d->pidfile;
+isa_ok($p, 'MooseX::Daemonize::Pid::File');
+#diag $p->dump;
 
+sleep(2);
+
+ok($p->does_file_exist, '... the PID file exists');
 ok($p->is_running, '... the daemon process is running (' . $p->pid . ')');
 
 my $pid = $p->pid;
@@ -90,5 +95,5 @@ diag "-------";
 diag `ps -x | grep test-app`;
 
 ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . ')');
-
+ok(!(-e $PIDFILE), '... the PID file has been removed');
 

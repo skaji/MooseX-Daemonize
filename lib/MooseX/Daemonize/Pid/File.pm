@@ -1,8 +1,14 @@
 package MooseX::Daemonize::Pid::File;
 use strict;    # because Kwalitee is pedantic
 use Moose;
+use Moose::Util::TypeConstraints;
+use MooseX::Types::Path::Class;
 
-use MooseX::Daemonize::Types;
+coerce 'MooseX::Daemonize::Pid::File' 
+    => from 'Str' 
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }
+    => from 'Path::Class::File' 
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) };
 
 our $VERSION = '0.01';
 
@@ -29,7 +35,9 @@ sub does_file_exist { -s (shift)->file }
 
 sub write {
     my $self = shift;
-    $self->file->openw->print($self->pid);
+    my $fh = $self->file->openw;
+    $fh->print($self->pid);
+    $fh->close;
 }
 
 override 'is_running' => sub {
@@ -54,8 +62,6 @@ MooseX::Daemonize::Pid::File - PID file management for MooseX::Daemonize
 =head1 ATTRIBUTES
 
 =over
-
-=item pid Int
 
 =item file Path::Class::File | Str
 

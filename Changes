@@ -2,12 +2,28 @@ Revision history for MooseX-Daemonize
 
 0.05
     * MooseX::Daemonize
-      - Fix logic that kills process so it doens't always warn about undead 
-        process
+      - Fix logic that kills process so it doens't always warn 
+        about undead process
       - Added stop_timeout to allow user to control timings.
-    
+      - Refactored to roles
+
+    * MooseX::Daemonize::Core
+      - the core daemonization methods are here
+        - added tests for this
+      
+    * MooseX::Daemonize::WithSignalHandling
+      - the SIG handling is here
+
+    * MooseX::Daemonize::WithPidFile
+      - the PID file handling is here, and 
+        delegates to the classes below
+
+    * MooseX::Daemonize::Pid
+      - added this package to replace the File::Pid stuff
+      
     * MooseX::Daemonize::Pid::File
-      - added this package to replace the File::Pid stuff (stevan)
+      - added this package to replace the File::Pid stuff, it is a subclass
+        of MooseX::Daemonize::Pid (stevan)
         - added tests for this (stevan)
 
 0.04 2007-11-11

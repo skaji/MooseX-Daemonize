@@ -53,11 +53,6 @@ sub daemon_detach {
 
     open(STDIN, "+>/dev/null");
 
-    # Avoid 'stdin reopened for output'
-    # warning with newer perls
-    open( NULL, '/dev/null' );
-    <NULL> if (0);
-
     if (my $stdout_file = $ENV{MX_DAEMON_STDOUT}) {
         open STDOUT, ">", $stdout_file
             or confess "Could not redirect STDOUT to $stdout_file : $!";
@@ -72,7 +67,7 @@ sub daemon_detach {
     }
     else {
         open(STDERR, "+>&STDIN");
-    }
+    }  
 }
 
 sub daemonize {

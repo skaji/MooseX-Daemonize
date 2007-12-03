@@ -1,8 +1,7 @@
 package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
-
-use MooseX::Daemonize::Types;
+use MooseX::Types::Path::Class;
 
 our $VERSION = 0.05;
 
@@ -70,9 +69,19 @@ sub start {
     
     $self->daemonize unless $self->foreground;
 
+    # make sure to clear the PID 
+    # so that a bad value doesn't
+    # stick around in the parent
+    $self->pidfile->clear_pid;
+    
     return unless $self->is_daemon;
 
     $self->pidfile->pid($$);
+    
+    # Avoid 'stdin reopened for output'
+    # warning with newer perls
+    open( NULL, '/dev/null' );
+    <NULL> if (0);    
 
     # Change to basedir
     chdir $self->basedir;
@@ -153,6 +162,8 @@ $_kill = sub {
 
 1;
 __END__
+
+=pod
 
 =head1 NAME
 
@@ -244,7 +255,7 @@ Litterally
 
 =item daemonize()
 
-Calls C<Proc::Daemon::Init> to daemonize this process. 
+Calls daemonize from MooseX::Daemonize::Core.
 
 =item setup_signals()
 
@@ -349,3 +360,5 @@ RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
 FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
+
+=cut

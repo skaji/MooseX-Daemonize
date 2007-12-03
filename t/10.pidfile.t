@@ -60,7 +60,7 @@ BEGIN {
 }
 
 {
-    my $PID = 2001;
+    my $PID = 9999;
     
     my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'baz.pid' ],

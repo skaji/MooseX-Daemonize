@@ -2,7 +2,6 @@ package MooseX::Daemonize::WithPidFile;
 use strict;
 use Moose::Role;
 
-use MooseX::Daemonize::Types;
 use MooseX::Daemonize::Pid::File;
 
 our $VERSION = 0.01;
@@ -22,3 +21,7 @@ has pidfile => (
 1;
 
 __END__
+
+=pod
+
+=cut

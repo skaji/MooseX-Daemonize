@@ -1,14 +1,21 @@
 package MooseX::Daemonize::Pid;
 use strict;    # because Kwalitee is pedantic
 use Moose;
+use Moose::Util::TypeConstraints;
+
+coerce 'MooseX::Daemonize::Pid' 
+    => from 'Int' 
+        => via { MooseX::Daemonize::Pid->new( pid => $_ ) };
 
 our $VERSION = '0.01';
 
 has 'pid' => (
-    is      => 'rw',
-    isa     => 'Int',
-    lazy    => 1,
-    default => sub { $$ }
+    is        => 'rw',
+    isa       => 'Int',
+    lazy      => 1,
+    clearer   => 'clear_pid',
+    predicate => 'has_pid',
+    default   => sub { $$ }
 );
 
 sub is_running { kill(0, (shift)->pid) ? 1 : 0 }
