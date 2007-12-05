@@ -51,12 +51,14 @@ sub daemon_detach {
     chdir '/';      # change to root directory
     umask 0;        # clear the file creation mask
 
-    # get the max numnber of possible file descriptors
-    my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
-    $openmax = 64 if !defined($openmax) || $openmax < 0;
+    unless ($options{dont_close_all_files}) {
+        # get the max numnber of possible file descriptors
+        my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
+        $openmax = 64 if !defined($openmax) || $openmax < 0;
 
-    # close them all
-    POSIX::close($_) foreach (0 .. $openmax);
+        # close them all
+        POSIX::close($_) foreach (0 .. $openmax);
+    }
 
     # fixup STDIN ...
 
@@ -77,7 +79,7 @@ sub daemon_detach {
     # fixup STDERR ...
 
     if (my $stderr_file = $ENV{MX_DAEMON_STDERR}) {
-        open STDERR, ">", "ERR.txt"
+        open STDERR, ">", $stderr_file
             or confess "Could not redirect STDERR to $stderr_file : $!";
     }
     else {
@@ -203,6 +205,8 @@ directory then simply change it later in your daemons code.
 
 =item Closes all open file descriptors.
 
+See below for information on how to change this part of the process.
+
 =item Reopen STDERR, STDOUT & STDIN to /dev/null
 
 This behavior can be controlled slightly though the MX_DAEMON_STDERR
@@ -225,6 +229,12 @@ found above, and by Googling "double fork daemonize".
 
 If you the double-fork behavior off, you might want to enable the
 I<ignore_zombies> behavior in the C<daemon_fork> method.
+
+=item I<dont_close_all_files>
+
+Setting this option to true will cause it to skip closing all the 
+filehandles, this is useful if you are opening things like sockets
+and such in the pre-fork. 
 
 =back
 
