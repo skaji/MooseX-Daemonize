@@ -9,7 +9,7 @@ all_from 'lib/MooseX/Daemonize.pm';
 build_requires 'Test::More'  => 0;
 
 requires 'Moose'                      => 0.20;
-requires 'MooseX::Getopt'             => 0.06;
+requires 'MooseX::Getopt'             => 0.07;
 requires 'MooseX::Types::Path::Class' => 0;
 
 no_index 'directory' => 'examples';
