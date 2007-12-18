@@ -3,6 +3,10 @@ use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
 
+use overload '""'     => sub { (shift)->pid },
+             '+0'     => sub { (shift)->pid },
+             fallback => 1;
+
 coerce 'MooseX::Daemonize::Pid' 
     => from 'Int' 
         => via { MooseX::Daemonize::Pid->new( pid => $_ ) };
