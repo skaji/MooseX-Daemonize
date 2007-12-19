@@ -20,7 +20,6 @@ has pidfile => (
     isa       => 'MooseX::Daemonize::Pid::File',
     is        => 'rw',
     lazy      => 1,
-    required  => 1,
     coerce    => 1,
     predicate => 'has_pidfile',
     builder   => 'init_pidfile',
@@ -33,7 +32,9 @@ after 'daemonize' => sub {
     # any bad PID values stashed around
     # - SL
     $self->pidfile->clear_pid;
-    $self->pidfile->write if $self->is_daemon;
+    if ($self->is_daemon) {
+        $self->pidfile->write;
+    }
 };
 
 1;

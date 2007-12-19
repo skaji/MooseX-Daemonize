@@ -9,7 +9,7 @@ with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
 
 has progname => (
-    metaclass => 'Getopt',    
+    metaclass => 'Getopt',
     isa       => 'Str',
     is        => 'ro',
     lazy      => 1,
@@ -21,17 +21,17 @@ has progname => (
 );
 
 has pidbase => (
-    metaclass => 'Getopt',    
+    metaclass => 'Getopt',
     isa       => 'Path::Class::Dir',
     is        => 'ro',
     coerce    => 1,
-    required  => 1,    
+    required  => 1,
     lazy      => 1,
     default   => sub { Path::Class::Dir->new('var', 'run') },
 );
 
 has basedir => (
-    metaclass => 'Getopt',    
+    metaclass => 'Getopt',
     isa       => 'Path::Class::Dir',
     is        => 'ro',
     coerce    => 1,
@@ -49,10 +49,26 @@ has foreground => (
 );
 
 has stop_timeout => (
-    metaclass => 'Getopt',    
+    metaclass => 'Getopt',
     isa       => 'Int',
     is        => 'rw',
     default   => sub { 2 }
+);
+
+# internal book-keeping
+
+has status_message => (
+    metaclass => 'NoGetopt',
+    isa       => 'Str',
+    is        => 'rw',
+    clearer   => 'clear_status_message',
+);
+
+has exit_code => (
+    metaclass => 'NoGetopt',
+    isa       => 'Int',
+    is        => 'rw',
+    clearer   => 'clear_exit_code',
 );
 
 # methods ...
@@ -66,7 +82,7 @@ sub init_pidfile {
     MooseX::Daemonize::Pid::File->new( file => $file );
 }
 
-# backwards compat, 
+# backwards compat,
 sub check      { (shift)->pidfile->is_running }
 sub save_pid   { (shift)->pidfile->write      }
 sub remove_pid { (shift)->pidfile->remove     }
@@ -77,24 +93,43 @@ sub get_pid    { (shift)->pidfile->pid        }
 sub setup_signals {
     my $self = shift;
     $SIG{'INT'} = sub { $self->handle_sigint };
-    $SIG{'HUP'} = sub { $self->handle_sighup };    
+    $SIG{'HUP'} = sub { $self->handle_sighup };
 }
 
-sub handle_sigint { $_[0]->stop; }
-sub handle_sighup { $_[0]->restart; }
+sub handle_sigint { $_[0]->stop    }
+sub handle_sighup { $_[0]->restart }
 
 ## daemon control methods ...
 
 sub start {
-    my ($self) = @_;
-    
-    confess "instance already running" if $self->pidfile->is_running;
-    
-    $self->daemonize unless $self->foreground;
-    
-    return unless $self->is_daemon;
+    my $self = shift;
 
-    $self->pidfile->pid($$);   
+    $self->clear_status_message;
+    $self->clear_exit_code;
+
+    if ($self->pidfile->is_running) {
+        $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');
+        return !($self->exit_code);
+    }
+    
+    if ($self->foreground) { 
+        $self->is_daemon(1);
+    }
+    else {      
+        eval { $self->daemonize };              
+        if ($@) {
+            $self->exit_code(1);
+            $self->status_message('Start failed : ' . $@);
+            return !($self->exit_code);
+        }
+    }
+
+    unless ($self->is_daemon) {
+        $self->status_message('Start succeeded');
+        return !($self->exit_code);
+    }
+
+    $self->pidfile->pid($$);
 
     # Change to basedir
     chdir $self->basedir;
@@ -104,22 +139,98 @@ sub start {
     return $$;
 }
 
+sub status {
+    my $self = shift;
+
+    $self->clear_status_message;
+    $self->clear_exit_code;
+
+    if ($self->pidfile->is_running) {
+        $self->status_message('Daemon is running with pid (' . $self->pidfile->pid . ')');    
+    }
+    else {            
+        $self->exit_code(1);
+        $self->status_message('Daemon is not running with pid (' . $self->pidfile->pid . ')');
+    }
+
+    return !($self->exit_code);
+}
+
 sub restart {
-    my ($self) = @_;
-    $self->stop( no_exit => 1 );
-    $self->start();
+    my $self = shift;
+
+    $self->clear_status_message;
+    $self->clear_exit_code;
+
+    unless ($self->stop) {
+        $self->exit_code(1);
+        $self->status_message('Restart (Stop) failed : ' . $@);
+    }
+
+    unless ($self->start) {
+        $self->exit_code(1);
+        $self->status_message('Restart (Start) failed : ' . $@);
+    }
+
+    $self->status_message("Restart successful")
+        if !$self->exit_code;
+
+    return !($self->exit_code);
 }
 
 # Make _kill *really* private
 my $_kill;
 
 sub stop {
-    my ( $self, %args ) = @_;
-    my $pid = $self->pidfile->pid;
-    $self->$_kill($pid) unless $self->foreground();
-    $self->pidfile->remove;
-    return 1 if $args{no_exit};
-    exit;
+    my $self = shift;
+
+    $self->clear_status_message;
+    $self->clear_exit_code;
+
+    # if the pid is not running
+    # then we dont need to stop
+    # anything ...
+    if ($self->pidfile->is_running) {
+
+        # if we are foreground, then
+        # no need to try and kill
+        # ourselves
+        unless ($self->foreground) {
+
+            # kill the process ...
+            eval { $self->$_kill($self->pidfile->pid) };
+            # and complain if we can't ...
+            if ($@) {
+                $self->exit_code(1);
+                $self->status_message('Stop failed : ' . $@);
+            }
+            # or gloat if we succeed ..
+            else {
+                $self->status_message('Stop succeeded');
+            }
+
+        }
+
+        # clean up ...
+        eval { $self->pidfile->remove };
+        if ($@) {
+            warn "Could not remove pidfile ("
+               . $self->pidfile->file
+               . ") because : $!";
+        }
+
+    }
+    else {
+        # this just returns the OK
+        # exit code for now, but
+        # we should make this overridable
+        $self->status_message("Not running");
+    }
+
+    # if we are returning to our script
+    # then we actually need the opposite
+    # of what the system/OS expects
+    return !($self->exit_code);
 }
 
 $_kill = sub {
@@ -142,15 +253,24 @@ $_kill = sub {
     # kill 0 => $pid returns 0 if the process is dead
     # $!{EPERM} could also be true if we cant kill it (permission error)
 
+    # if this is being called
+    # inside the daemon then
+    # we don't want sig-INT to
+    # fall into a loop here
+    # so we reset it.
+    if ($self->is_daemon) {
+        $SIG{INT} = 'DEFAULT';
+    }
+
     # Try SIGINT ... 2s ... SIGTERM ... 2s ... SIGKILL ... 3s ... UNDEAD!
     for ( [ 2, $timeout ], [15, $timeout], [9, $timeout * 1.5] ) {
         my ($signal, $timeout) = @$_;
         $timeout = int $timeout;
-        
+
         CORE::kill($signal, $pid);
-        
+
         last unless CORE::kill 0 => $pid or $!{EPERM};
-        
+
         while ($timeout) {
             sleep(1);
             last unless CORE::kill 0 => $pid or $!{EPERM};
@@ -171,7 +291,7 @@ __END__
 
 =head1 NAME
 
-MooseX::Daemonize - provides a Role that daemonizes your Moose based 
+MooseX::Daemonize - provides a Role that daemonizes your Moose based
 application.
 
 =head1 VERSION
@@ -182,38 +302,43 @@ This document describes MooseX::Daemonize version 0.05
 
     package My::Daemon;
     use Moose;
-    
+
     with qw(MooseX::Daemonize);
-    
+
     # ... define your class ....
-    
-    after start => sub { 
+
+    after start => sub {
         my $self = shift;
         return unless $self->is_daemon;
         # your daemon code here ...
     };
 
-    # then in your script ... 
-    
+    # then in your script ...
+
     my $daemon = My::Daemon->new_with_options();
-    
+
     my ($command) = @{$daemon->extra_argv}
     defined $command || die "No command specified";
-    
-    $daemon->start() if $command eq 'start';
-    $daemon->stop()  if $command eq 'stop';
-     
+
+    $daemon->start   if $command eq 'start';
+    $daemon->status  if $command eq 'status';
+    $daemon->restart if $command eq 'restart';
+    $daemon->stop    if $command eq 'stop';
+
+    warn($daemon->status);
+    exit($daemon->exit_code);
+
 =head1 DESCRIPTION
 
 Often you want to write a persistant daemon that has a pid file, and responds
-appropriately to Signals. This module provides a set of basic roles as an  
+appropriately to Signals. This module provides a set of basic roles as an
 infrastructure to do that.
 
 =head1 ATTRIBUTES
 
 This list includes attributes brought in from other roles as well
 we include them here for ease of documentation. All of these attributes
-are settable though L<MooseX::Getopt>'s command line handling, with the 
+are settable though L<MooseX::Getopt>'s command line handling, with the
 exception of C<is_daemon>.
 
 =over
@@ -232,14 +357,14 @@ The file we store our PID in, defaults to C</var/run/$progname>
 
 =item I<foreground Bool>
 
-If true, the process won't background. Useful for debugging. This option can 
+If true, the process won't background. Useful for debugging. This option can
 be set via Getopt's -f.
 
 =item I<is_daemon Bool>
 
-If true, the process is the backgrounded daemon process, if false it is the 
-parent process. This is useful for example in an C<after 'start' => sub { }> 
-block. 
+If true, the process is the backgrounded daemon process, if false it is the
+parent process. This is useful for example in an C<after 'start' => sub { }>
+block.
 
 B<NOTE:> This option is explicitly B<not> available through L<MooseX::Getopt>.
 
@@ -250,15 +375,25 @@ it. Defaults to 2 seconds.
 
 =back
 
-=head1 METHODS 
+These are the internal attributes, which are not available through MooseX::Getopt.
+
+=over 4
+
+=item I<exit_code Int>
+
+=item I<status Str>
+
+=back
+
+=head1 METHODS
 
 =head2 Daemon Control Methods
 
-These methods can be used to control the daemon behavior. Every effort 
-has been made to have these methods DWIM (Do What I Mean), so that you 
-can focus on just writing the code for your daemon. 
+These methods can be used to control the daemon behavior. Every effort
+has been made to have these methods DWIM (Do What I Mean), so that you
+can focus on just writing the code for your daemon.
 
-Extending these methods is best done with the L<Moose> method modifiers, 
+Extending these methods is best done with the L<Moose> method modifiers,
 such as C<before>, C<after> and C<around>.
 
 =over 4
@@ -278,7 +413,10 @@ Literally this is:
     $self->stop();
     $self->start();
 
+=item B<status>
+
 =back
+
 
 =head2 Pidfile Handling Methods
 
@@ -291,7 +429,7 @@ it to store the PID in the file C<$pidbase/$progname.pid>.
 
 =item B<check>
 
-This checks to see if the daemon process is currently running by checking 
+This checks to see if the daemon process is currently running by checking
 the pidfile.
 
 =item B<get_pid>
@@ -314,7 +452,7 @@ Removes the pidfile.
 
 =item B<setup_signals>
 
-Setup the signal handlers, by default it only sets up handlers for SIGINT and 
+Setup the signal handlers, by default it only sets up handlers for SIGINT and
 SIGHUP. If you wish to add more signals just use the C<after> method modifier
 and add them.
 
@@ -364,14 +502,14 @@ Chris Prather  C<< <perigrin@cpan.org> >>
 
 =head1 THANKS
 
-Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the 
+Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the
 #moose denzians
 
 Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
+Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 This module is free software; you can redistribute it and/or
