@@ -36,13 +36,13 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
         
         # this tests our bad PID 
         # cleanup functionality.
-        print "Our parent PID is " . $self->pidfile->pid . "\n";
+        print "Our parent PID is " . $self->pidfile->pid . "\n" if ::DEBUG;
         
         $self->daemonize;
         return unless $self->is_daemon;
         
         # make it easy to find with ps
-        $0 = 'test-app';
+        $0 = 'test-app-2';
         $SIG{INT} = sub { 
             print "Got INT! Oh Noes!"; 
             $self->pidfile->remove;

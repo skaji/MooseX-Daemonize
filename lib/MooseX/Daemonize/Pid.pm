@@ -85,7 +85,7 @@ L<http://rt.cpan.org>.
 
 =head1 AUTHOR
 
-Stevan Little  C<< <stevan@cpan.org> >>
+Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 

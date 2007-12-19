@@ -7,6 +7,9 @@ our $VERSION = 0.05;
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
+     
+use constant OK    => 0;
+use constant ERROR => 1;
 
 has progname => (
     metaclass => 'Getopt',
@@ -112,7 +115,8 @@ sub start {
     $self->clear_exit_code;
 
     if ($self->pidfile->is_running) {
-        $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');
+        $self->exit_code(OK);
+        $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');        
         return !($self->exit_code);
     }
     
@@ -122,13 +126,14 @@ sub start {
     else {      
         eval { $self->daemonize };              
         if ($@) {
-            $self->exit_code(1);
+            $self->exit_code(ERROR);
             $self->status_message('Start failed : ' . $@);
             return !($self->exit_code);
         }
     }
 
     unless ($self->is_daemon) {
+        $self->exit_code(OK);        
         $self->status_message('Start succeeded');
         return !($self->exit_code);
     }
@@ -150,10 +155,11 @@ sub status {
     $self->clear_exit_code;
 
     if ($self->pidfile->is_running) {
+        $self->exit_code(OK);        
         $self->status_message('Daemon is running with pid (' . $self->pidfile->pid . ')');    
     }
     else {            
-        $self->exit_code(1);
+        $self->exit_code(ERROR);
         $self->status_message('Daemon is not running with pid (' . $self->pidfile->pid . ')');
     }
 
@@ -167,17 +173,19 @@ sub restart {
     $self->clear_exit_code;
 
     unless ($self->stop) {
-        $self->exit_code(1);
+        $self->exit_code(ERROR);
         $self->status_message('Restart (Stop) failed : ' . $@);
     }
 
     unless ($self->start) {
-        $self->exit_code(1);
+        $self->exit_code(ERROR);
         $self->status_message('Restart (Start) failed : ' . $@);
     }
 
-    $self->status_message("Restart successful")
-        if !$self->exit_code;
+    if ($self->exit_code == OK) {
+        $self->exit_code(OK);
+        $self->status_message("Restart successful");
+    }
 
     return !($self->exit_code);
 }
@@ -205,11 +213,12 @@ sub stop {
             eval { $self->$_kill($self->pidfile->pid) };
             # and complain if we can't ...
             if ($@) {
-                $self->exit_code(1);
+                $self->exit_code(ERROR);
                 $self->status_message('Stop failed : ' . $@);
             }
             # or gloat if we succeed ..
             else {
+                $self->exit_code(OK);
                 $self->status_message('Stop succeeded');
             }
 
@@ -228,6 +237,7 @@ sub stop {
         # this just returns the OK
         # exit code for now, but
         # we should make this overridable
+        $self->exit_code(OK);        
         $self->status_message("Not running");
     }
 
@@ -317,7 +327,7 @@ This document describes MooseX::Daemonize version 0.05
     $daemon->restart if $command eq 'restart';
     $daemon->stop    if $command eq 'stop';
 
-    warn($daemon->status);
+    warn($daemon->status_message);
     exit($daemon->exit_code);
 
 =head1 DESCRIPTION
@@ -373,7 +383,7 @@ These are the internal attributes, which are not available through MooseX::Getop
 
 =item I<exit_code Int>
 
-=item I<status Str>
+=item I<status_message Str>
 
 =back
 
@@ -406,6 +416,8 @@ Literally this is:
     $self->start();
 
 =item B<status>
+
+=item B<shutdown>
 
 =back
 
@@ -488,9 +500,11 @@ L<http://rt.cpan.org>.
 
 L<Proc::Daemon>, L<Daemon::Generic>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Chris Prather  C<< <perigrin@cpan.org> >>
+
+Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 THANKS
 

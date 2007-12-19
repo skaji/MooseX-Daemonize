@@ -8,6 +8,13 @@ Revision history for MooseX-Daemonize
       - Refactored to roles
         - removed Proc::Daemon dependency
         - removed File::Pid dependency
+      - added exit_code and status_message to capture the 
+        exit code and a status message :)
+        - refactored start/stop/restart to use these
+        - added tests for this
+      - added a &status command which returns a bool telling
+        you if the daemon is running or not
+        - added tests for this
       
     * Test::MooseX::Daemonize
       - updated docs 
