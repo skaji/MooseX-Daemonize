@@ -92,12 +92,16 @@ sub get_pid    { (shift)->pidfile->pid        }
 
 sub setup_signals {
     my $self = shift;
-    $SIG{'INT'} = sub { $self->handle_sigint };
-    $SIG{'HUP'} = sub { $self->handle_sighup };
+    $SIG{'INT'} = sub { $self->shutdown };
+# I can't think of a sane default here really ...
+#    $SIG{'HUP'} = sub { $self->handle_sighup };
 }
 
-sub handle_sigint { $_[0]->stop    }
-sub handle_sighup { $_[0]->restart }
+sub shutdown {
+    my $self = shift;
+    $self->pidfile->remove if $self->pidfile->pid == $$;
+    exit(0);
+}
 
 ## daemon control methods ...
 
@@ -237,30 +241,18 @@ $_kill = sub {
     my ( $self, $pid ) = @_;
     return unless $pid;
     unless ( CORE::kill 0 => $pid ) {
-
         # warn "$pid already appears dead.";
         return;
     }
 
     if ( $pid eq $$ ) {
-
-        # warn "$pid is us! Can't commit suicide.";
-        return;
+        die "$pid is us! Can't commit suicide.";
     }
 
     my $timeout = $self->stop_timeout;
 
     # kill 0 => $pid returns 0 if the process is dead
     # $!{EPERM} could also be true if we cant kill it (permission error)
-
-    # if this is being called
-    # inside the daemon then
-    # we don't want sig-INT to
-    # fall into a loop here
-    # so we reset it.
-    if ($self->is_daemon) {
-        $SIG{INT} = 'DEFAULT';
-    }
 
     # Try SIGINT ... 2s ... SIGTERM ... 2s ... SIGKILL ... 3s ... UNDEAD!
     for ( [ 2, $timeout ], [15, $timeout], [9, $timeout * 1.5] ) {
