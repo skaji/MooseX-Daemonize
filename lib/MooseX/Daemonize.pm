@@ -293,8 +293,7 @@ __END__
 
 =head1 NAME
 
-MooseX::Daemonize - provides a Role that daemonizes your Moose based
-application.
+MooseX::Daemonize - Role for daemonizing your Moose based application
 
 =head1 VERSION
 
