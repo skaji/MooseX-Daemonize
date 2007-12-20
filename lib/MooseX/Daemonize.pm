@@ -223,15 +223,6 @@ sub stop {
             }
 
         }
-
-        # clean up ...
-        eval { $self->pidfile->remove };
-        if ($@) {
-            warn "Could not remove pidfile ("
-               . $self->pidfile->file
-               . ") because : $!";
-        }
-
     }
     else {
         # this just returns the OK
@@ -265,22 +256,38 @@ $_kill = sub {
     # $!{EPERM} could also be true if we cant kill it (permission error)
 
     # Try SIGINT ... 2s ... SIGTERM ... 2s ... SIGKILL ... 3s ... UNDEAD!
+    my $terminating_signal;
     for ( [ 2, $timeout ], [15, $timeout], [9, $timeout * 1.5] ) {
         my ($signal, $timeout) = @$_;
         $timeout = int $timeout;
 
         CORE::kill($signal, $pid);
 
-        last unless CORE::kill 0 => $pid or $!{EPERM};
-
         while ($timeout) {
-            sleep(1);
-            last unless CORE::kill 0 => $pid or $!{EPERM};
+            unless(CORE::kill 0 => $pid or $!{EPERM}) {
+                $terminating_signal = $signal;
+                last;
+            }
             $timeout--;
+            sleep(1) if $timeout;
         }
+
+        last if $terminating_signal;
     }
 
-    return unless ( CORE::kill 0 => $pid or $!{EPERM} );
+    if($terminating_signal) {
+        if($terminating_signal == 9) {
+            # clean up the pidfile ourselves iff we used -9 and it worked
+            warn "Had to resort to 'kill -9' and it worked, wiping pidfile";
+            eval { $self->pidfile->remove };
+            if ($@) {
+                warn "Could not remove pidfile ("
+                   . $self->pidfile->file
+                   . ") because : $!";
+            }
+        }
+        return;
+    }
 
     # IF it is still running
     Carp::carp "$pid doesn't seem to want to die.";     # AHH EVIL DEAD!
