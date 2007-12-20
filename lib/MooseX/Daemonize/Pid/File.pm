@@ -52,7 +52,7 @@ sub does_file_exist { -s (shift)->file }
 sub write {
     my $self = shift;
     my $fh = $self->file->openw;
-    $fh->print($self->pid);
+    $fh->print($self->pid . "\n");
     $fh->close;
 }
 
