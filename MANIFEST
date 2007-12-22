@@ -1,8 +1,6 @@
 .cvsignore
 Build.PL
 Changes
-examples/moose_room.pl
-IDEAS
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -15,8 +13,11 @@ inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-lab/dec.pl
 lib/MooseX/Daemonize.pm
+lib/MooseX/Daemonize/Core.pm
+lib/MooseX/Daemonize/Pid.pm
+lib/MooseX/Daemonize/Pid/File.pm
+lib/MooseX/Daemonize/WithPidFile.pm
 lib/Test/MooseX/Daemonize.pm
 Makefile.PL
 MANIFEST			This list of files
@@ -25,7 +26,8 @@ README
 t/00.load.t
 t/01.filecreate.t
 t/02.stdout.t
-t/kwalitee.t
-t/perlcritic.t
+t/10.pidfile.t
+t/20.core.t
+t/30.with_pid_file.t
 t/pod-coverage.t
 t/pod.t

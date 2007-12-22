@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
