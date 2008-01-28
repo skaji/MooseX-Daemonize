@@ -30,7 +30,7 @@ has pidbase => (
     coerce    => 1,
     required  => 1,
     lazy      => 1,
-    default   => sub { Path::Class::Dir->new('var', 'run') },
+    default   => sub { Path::Class::Dir->new('', 'var', 'run') },
 );
 
 has basedir => (

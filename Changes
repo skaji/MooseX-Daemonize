@@ -1,5 +1,9 @@
 Revision history for MooseX-Daemonize
 
+    * MooseX::Daemonize
+      - Made default pidbase '/var/run' rather than './var/run'
+      - Small fixups to pidfile testing in t/31.with_pid_file_and_poe.t
+
 0.06 Fri. Dec. 21, 2007
     * MooseX::Daemonize
       - Fix logic that kills process so it doens't always warn 

@@ -25,6 +25,8 @@ my $PIDFILE            = catfile($CWD, 'test-app.pid');
 $ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
 $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
 
+unlink $PIDFILE; # clean up anythinf leftover by last run
+
 {
     package MyFooDaemon;
     use Moose;
@@ -63,6 +65,7 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
             },
             terminate => sub {
               my ($kernel, $heap) = @_[KERNEL, HEAP];
+              $self->pidfile->remove if $self->pidfile->pid == $$;
             }
           },
           heap => [ 0 ]
