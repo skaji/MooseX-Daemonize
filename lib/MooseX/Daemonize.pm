@@ -115,7 +115,7 @@ sub start {
     $self->clear_exit_code;
 
     if ($self->pidfile->is_running) {
-        $self->exit_code(OK);
+        $self->exit_code($self->OK);
         $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');        
         return !($self->exit_code);
     }
@@ -126,14 +126,14 @@ sub start {
     else {      
         eval { $self->daemonize };              
         if ($@) {
-            $self->exit_code(ERROR);
+            $self->exit_code($self->ERROR);
             $self->status_message('Start failed : ' . $@);
             return !($self->exit_code);
         }
     }
 
     unless ($self->is_daemon) {
-        $self->exit_code(OK);        
+        $self->exit_code($self->OK);        
         $self->status_message('Start succeeded');
         return !($self->exit_code);
     }
@@ -155,11 +155,11 @@ sub status {
     $self->clear_exit_code;
 
     if ($self->pidfile->is_running) {
-        $self->exit_code(OK);        
+        $self->exit_code($self->OK);        
         $self->status_message('Daemon is running with pid (' . $self->pidfile->pid . ')');    
     }
     else {            
-        $self->exit_code(ERROR);
+        $self->exit_code($self->ERROR);
         $self->status_message('Daemon is not running with pid (' . $self->pidfile->pid . ')');
     }
 
@@ -173,17 +173,17 @@ sub restart {
     $self->clear_exit_code;
 
     unless ($self->stop) {
-        $self->exit_code(ERROR);
+        $self->exit_code($self->ERROR);
         $self->status_message('Restart (Stop) failed : ' . $@);
     }
 
     unless ($self->start) {
-        $self->exit_code(ERROR);
+        $self->exit_code($self->ERROR);
         $self->status_message('Restart (Start) failed : ' . $@);
     }
 
-    if ($self->exit_code == OK) {
-        $self->exit_code(OK);
+    if ($self->exit_code == $self->OK) {
+        $self->exit_code($self->OK);
         $self->status_message("Restart successful");
     }
 
@@ -213,12 +213,12 @@ sub stop {
             eval { $self->$_kill($self->pidfile->pid) };
             # and complain if we can't ...
             if ($@) {
-                $self->exit_code(ERROR);
+                $self->exit_code($self->ERROR);
                 $self->status_message('Stop failed : ' . $@);
             }
             # or gloat if we succeed ..
             else {
-                $self->exit_code(OK);
+                $self->exit_code($self->OK);
                 $self->status_message('Stop succeeded');
             }
 
@@ -228,7 +228,7 @@ sub stop {
         # this just returns the OK
         # exit code for now, but
         # we should make this overridable
-        $self->exit_code(OK);        
+        $self->exit_code($self->OK);        
         $self->status_message("Not running");
     }
 
@@ -473,6 +473,22 @@ Handle a INT signal, by default calls C<$self->stop()>
 =item B<handle_sighup>
 
 Handle a HUP signal. By default calls C<$self->restart()>
+
+=back
+
+=head2 Exit Code Methods
+
+These are overriable constant methods used for setting the exit code.
+
+=over 4
+
+=item OK
+
+Returns 0.
+
+=item ERROR
+
+Returns 1.
 
 =back
 
