@@ -1,11 +1,8 @@
-.cvsignore
-Build.PL
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
-inc/Module/Install/Build.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
@@ -20,7 +17,8 @@ lib/MooseX/Daemonize/Pid/File.pm
 lib/MooseX/Daemonize/WithPidFile.pm
 lib/Test/MooseX/Daemonize.pm
 Makefile.PL
-MANIFEST			This list of files
+MANIFEST
+MANIFEST.SKIP
 META.yml
 README
 t/00.load.t
@@ -29,5 +27,6 @@ t/02.stdout.t
 t/10.pidfile.t
 t/20.core.t
 t/30.with_pid_file.t
+t/31.with_pid_file_and_poe.t
 t/pod-coverage.t
 t/pod.t
