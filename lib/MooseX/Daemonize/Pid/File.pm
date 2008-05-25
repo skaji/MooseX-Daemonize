@@ -152,7 +152,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
+Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
 reserved.
 
 This module is free software; you can redistribute it and/or

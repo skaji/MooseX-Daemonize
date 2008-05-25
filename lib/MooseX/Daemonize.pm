@@ -3,13 +3,13 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
      
-use constant OK    => 0;
-use constant ERROR => 1;
+sub OK    () { 0 }
+sub ERROR () { 1 }
 
 has progname => (
     metaclass => 'Getopt',
@@ -537,7 +537,7 @@ Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 This module is free software; you can redistribute it and/or
