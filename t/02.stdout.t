@@ -30,16 +30,18 @@ my $Test = Test::Builder->new;
 }
 
 package main;
-use Cwd;
 use strict;
 use warnings;
 
+use File::Spec::Functions;
+use File::Temp qw(tempdir);
+
+my $dir = tempdir( CLEANUP => 1 );
+
 ## Try to make sure we are in the test directory
-chdir 't' if ( Cwd::cwd() !~ m|/t$| );
-my $cwd = Cwd::cwd();
 my $app = TestOutput->new(
-    pidbase     => $cwd,
-    test_output => join( '/', $cwd, 'results' ),
+    pidbase     => $dir,
+    test_output => catfile($dir, 'results'),
 );
 daemonize_ok( $app, 'child forked okay' );
 sleep(3);    # give ourself a chance to produce some output

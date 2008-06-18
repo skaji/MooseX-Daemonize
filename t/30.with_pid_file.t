@@ -3,12 +3,15 @@
 use strict;
 use warnings;
 
-use Cwd;
 use File::Spec::Functions;
 
 use Test::More no_plan => 1;
 use Test::Exception;
 use Test::Moose;
+use File::Temp qw(tempdir);
+
+my $dir = tempdir( CLEANUP => 1 );
+
 
 BEGIN {
     use_ok('MooseX::Daemonize::Core');  
@@ -16,10 +19,9 @@ BEGIN {
 
 use constant DEBUG => 0;
 
-my $CWD                = Cwd::cwd;
-my $PIDFILE            = catfile($CWD, 'test-app.pid');
-$ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
-$ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
+my $PIDFILE            = catfile($dir, 'test-app.pid');
+$ENV{MX_DAEMON_STDOUT} = catfile($dir, 'Out.txt');
+$ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
 
 {
     package MyFooDaemon;

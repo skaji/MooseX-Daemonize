@@ -104,19 +104,18 @@ This document describes MooseX::Daemonize version 0.0.1
 
 =head1 SYNOPSIS
     
-    package main;
-    use Cwd;
+    use File::Spec::Functions;
+    use File::Temp qw(tempdir);
+
+    my $dir = tempdir( CLEANUP => 1 );
 
     ## Try to make sure we are in the test directory
-    chdir 't' if ( Cwd::cwd() !~ m|/t$| );
-    my $cwd = Cwd::cwd();
 
-    my $file = join( '/', $cwd, 'im_alive' );
-    my $daemon = FileMaker->new( pidbase => '.', filename => $file );
+    my $file = catfile( $dir, "im_alive" );
+    my $daemon = FileMaker->new( pidbase => $dir, filename => $file );
 
     daemonize_ok( $daemon, 'child forked okay' );
     ok( -e $file, "$file exists" );
-    unlink($file);
 
 =head1 DESCRIPTION
 
