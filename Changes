@@ -1,5 +1,10 @@
 Revision history for MooseX-Daemonize
 
+0.08
+    * t/
+      - Removed usage of Cwd in favour of a temporary dir to prevent test fails
+        when running in an unwritable dir
+
 0.07 Saturday, May 24, 2008
     * MooseX::Daemonize
       - Made default pidbase '/var/run' rather 
