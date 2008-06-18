@@ -2,11 +2,14 @@
 
 use strict;
 use warnings;
-use Cwd;
 use File::Spec::Functions;
 
 use Test::More tests => 29;
 use Test::Moose;
+
+use File::Temp qw(tempdir);
+
+my $dir = tempdir( CLEANUP => 1 );
 
 BEGIN {
     use_ok('MooseX::Daemonize');
@@ -14,10 +17,9 @@ BEGIN {
 
 use constant DEBUG => 0;
 
-my $CWD                = Cwd::cwd;
-my $FILENAME           = "$CWD/im_alive";
-$ENV{MX_DAEMON_STDOUT} = catfile($CWD, 'Out.txt');
-$ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
+my $FILENAME           = catfile($dir, "im_alive");
+$ENV{MX_DAEMON_STDOUT} = catfile($dir, 'Out.txt');
+$ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
 
 {
 
@@ -42,7 +44,7 @@ $ENV{MX_DAEMON_STDERR} = catfile($CWD, 'Err.txt');
 }
 
 my $app = FileMaker->new(
-    pidbase  => $CWD,
+    pidbase  => $dir,
     filename => $FILENAME,
 );
 isa_ok($app, 'FileMaker');
@@ -52,7 +54,7 @@ does_ok($app, 'MooseX::Daemonize::Core');
 
 isa_ok($app->pidfile, 'MooseX::Daemonize::Pid::File');
 
-is($app->pidfile->file, "$CWD/filemaker.pid", '... got the right PID file path');
+is($app->pidfile->file, catfile($dir, "filemaker.pid"), '... got the right PID file path');
 ok(not(-e $app->pidfile->file), '... our pidfile does not exist');
 
 ok(!$app->status, '... the daemon is running');
