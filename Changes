@@ -1,6 +1,6 @@
 Revision history for MooseX-Daemonize
 
-0.08
+0.08 Sunday, Sept. 7, 2008
     * t/
       - Removed usage of Cwd in favour of a temporary dir to prevent test fails
         when running in an unwritable dir
