@@ -4,6 +4,7 @@ Revision history for MooseX-Daemonize
     * t/
       - Removed usage of Cwd in favour of a temporary dir to prevent test fails
         when running in an unwritable dir
+      - patch to ensure that t/01.filecreate.t passes (thanks to Jose Luis Rey)
 
 0.07 Saturday, May 24, 2008
     * MooseX::Daemonize

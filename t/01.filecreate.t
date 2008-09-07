@@ -40,6 +40,7 @@ $ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
         my ( $self, $file ) = @_;
         open( my $FILE, ">$file" ) || die $!;
         close($FILE);
+        sleep 1 while 1;
     }
 }
 
