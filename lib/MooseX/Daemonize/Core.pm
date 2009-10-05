@@ -3,7 +3,7 @@ use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 
-our $VERSION = 0.01;
+our $VERSION = '0.09';
 
 use POSIX ();
 

@@ -14,5 +14,6 @@ requires 'MooseX::Types::Path::Class' => 0;
 
 no_index 'directory' => 'examples';
 
-auto_install;
+auto_manifest;
+auto_repository;
 WriteAll;

@@ -1,12 +1,13 @@
 package Test::MooseX::Daemonize;
 use strict;
 
+our $VERSION   = '0.09';
+our $AUTHORITY = 'cpan:PERIGRIN';
+
 # BEGIN CARGO CULTING
 use Sub::Exporter;
 use Test::Builder;
 
-our $VERSION   = '0.03';
-our $AUTHORITY = 'cpan:PERIGRIN';
 
 {
     my @exports = qw[

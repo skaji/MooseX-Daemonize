@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION = 0.08;
+our $VERSION = "0.09";
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
@@ -524,7 +524,7 @@ L<Proc::Daemon>, L<Daemon::Generic>
 
 =head1 AUTHORS
 
-Chris Prather  C<< <perigrin@cpan.org> >>
+Chris Prather  C<< <chris@prather.org >>
 
 Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
@@ -537,7 +537,7 @@ Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2009, Chris Prather C<< <chris@prather.org> >>. Some rights
 reserved.
 
 This module is free software; you can redistribute it and/or

@@ -2,12 +2,12 @@ package MooseX::Daemonize::Pid;
 use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
+our $VERSION = '0.09';
 
 coerce 'MooseX::Daemonize::Pid' 
     => from 'Int' 
         => via { MooseX::Daemonize::Pid->new( pid => $_ ) };
 
-our $VERSION = '0.01';
 
 has 'pid' => (
     is        => 'rw',

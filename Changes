@@ -1,4 +1,7 @@
 Revision history for MooseX-Daemonize
+0.09 2009-10-05
+	* s/no_plan => 1/'no_plan'/g (Dave Rolsky)
+	* Synchronize Version numbers
 
 0.08 Sunday, Sept. 7, 2008
     * t/

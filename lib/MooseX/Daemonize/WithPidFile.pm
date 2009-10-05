@@ -2,10 +2,10 @@ package MooseX::Daemonize::WithPidFile;
 use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
+our $VERSION = '0.09';
+
 
 use MooseX::Daemonize::Pid::File;
-
-our $VERSION = 0.01;
 
 with 'MooseX::Daemonize::Core';
 
