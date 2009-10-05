@@ -16,7 +16,7 @@ my $dir = tempdir( CLEANUP => 1 );
 BEGIN {
     eval 'use POE::Kernel;';
     plan skip_all => "POE required for this test" if $@;
-    plan no_plan => 1;
+    plan 'no_plan';
     use_ok('MooseX::Daemonize::Core');
     
 }

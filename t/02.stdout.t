@@ -1,4 +1,4 @@
-use Test::More no_plan => 1;
+use Test::More 'no_plan';
 use Test::Builder;
 use Test::MooseX::Daemonize;
 use MooseX::Daemonize;

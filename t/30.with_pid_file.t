@@ -5,7 +5,7 @@ use warnings;
 
 use File::Spec::Functions;
 
-use Test::More no_plan => 1;
+use Test::More 'no_plan';
 use Test::Exception;
 use Test::Moose;
 use File::Temp qw(tempdir);
