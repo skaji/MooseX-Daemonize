@@ -1,7 +1,7 @@
 package Test::MooseX::Daemonize;
 use strict;
 
-our $VERSION   = '0.09';
+our $VERSION   = '0.10';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
 # BEGIN CARGO CULTING
@@ -104,7 +104,7 @@ Test::MooseX::Daemonize - Tool to help test MooseX::Daemonize applications
 This document describes MooseX::Daemonize version 0.0.1
 
 =head1 SYNOPSIS
-    
+
     use File::Spec::Functions;
     use File::Temp qw(tempdir);
 
@@ -120,8 +120,8 @@ This document describes MooseX::Daemonize version 0.0.1
 
 =head1 DESCRIPTION
 
-This module provides some basic Test::Builder compatible test methods to 
-use when writing tests for you MooseX::Daemonize based modules. 
+This module provides some basic Test::Builder compatible test methods to
+use when writing tests for you MooseX::Daemonize based modules.
 
 =head1 EXPORTED FUNCTIONS
 
@@ -129,16 +129,16 @@ use when writing tests for you MooseX::Daemonize based modules.
 
 =item B<daemonize_ok ( $daemon, ?$msg )>
 
-This will attempt to daemonize your C<$daemon> returning ok on 
+This will attempt to daemonize your C<$daemon> returning ok on
 success and not ok on failure.
 
 =item B<check_test_output ( $daemon )>
 
-This is expected to be used with a C<$daemon> which does the 
+This is expected to be used with a C<$daemon> which does the
 B<Test::MooseX::Daemonize::Testable> role (included in this package
-see the source for more info). It will collect the test output 
-from your daemon and apply it in the parent process by mucking 
-around with L<Test::Builder> stuff, again, read the source for 
+see the source for more info). It will collect the test output
+from your daemon and apply it in the parent process by mucking
+around with L<Test::Builder> stuff, again, read the source for
 more info. If we get time we will document this more thoroughly.
 
 =back
@@ -165,7 +165,7 @@ Chris Prather  C<< <perigrin@cpan.org> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserved.
+Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

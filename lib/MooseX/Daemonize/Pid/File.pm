@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;
@@ -12,16 +12,16 @@ use MooseX::Getopt::OptionTypeMap;
 # set up some basic coercions
 # that will come in handy
 # - SL
-coerce 'MooseX::Daemonize::Pid::File' 
-    => from 'Str' 
+coerce 'MooseX::Daemonize::Pid::File'
+    => from 'Str'
         => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }
-    => from 'ArrayRef' 
-        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }        
-    => from 'Path::Class::File' 
+    => from 'ArrayRef'
+        => via { MooseX::Daemonize::Pid::File->new( file => $_ ) }
+    => from 'Path::Class::File'
         => via { MooseX::Daemonize::Pid::File->new( file => $_ ) };
- 
+
 # NOTE:
-# make sure this class plays 
+# make sure this class plays
 # well with MooseX::Getopt
 # - SL
 MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
@@ -31,7 +31,7 @@ MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
 extends 'MooseX::Daemonize::Pid';
 
 has '+pid' => (
-    default => sub { 
+    default => sub {
         my $self = shift;
         $self->does_file_exist
             ? $self->file->slurp(chomp => 1)
@@ -70,17 +70,17 @@ __END__
 =head1 NAME
 
 MooseX::Daemonize::Pid::File - PID file management for MooseX::Daemonize
-     
+
 =head1 DESCRIPTION
 
 This object extends L<MooseX::Daemonize::Pid> to add persistence in a Pidfile.
 
-This class sets up some basic coercion routines for itself so that it can 
+This class sets up some basic coercion routines for itself so that it can
 be created from a I<Str> (a file name), I<ArrayRef> (an array of path components
-for a filename) or a I<Path::Class::File> object. 
+for a filename) or a I<Path::Class::File> object.
 
 This class registers it's type with L<MooseX::Getopt> as well, and is expected
-to be passed on the command line as a string (which will then go through the 
+to be passed on the command line as a string (which will then go through the
 coercion routines mentioned above).
 
 =head1 ATTRIBUTES
@@ -89,14 +89,14 @@ coercion routines mentioned above).
 
 =item I<pid Int>
 
-This is inherited from L<MooseX:Daemonize::Pid> and extended here to 
+This is inherited from L<MooseX:Daemonize::Pid> and extended here to
 get it's default value from the Pidfile (if available).
 
 =item I<file Path::Class::File | Str>
 
 =back
 
-=head1 METHODS 
+=head1 METHODS
 
 =over
 
@@ -104,7 +104,7 @@ get it's default value from the Pidfile (if available).
 
 =item B<has_pid>
 
-Both of these methods are inherited from L<MooseX:Daemonize::Pid> see that 
+Both of these methods are inherited from L<MooseX:Daemonize::Pid> see that
 module for more information.
 
 =item B<remove>
@@ -152,7 +152,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
+Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 This module is free software; you can redistribute it and/or

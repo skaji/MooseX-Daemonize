@@ -2,10 +2,10 @@ package MooseX::Daemonize::Pid;
 use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
-coerce 'MooseX::Daemonize::Pid' 
-    => from 'Int' 
+coerce 'MooseX::Daemonize::Pid'
+    => from 'Int'
         => via { MooseX::Daemonize::Pid->new( pid => $_ ) };
 
 
@@ -29,10 +29,10 @@ __END__
 =head1 NAME
 
 MooseX::Daemonize::Pid - PID management for MooseX::Daemonize
-     
+
 =head1 DESCRIPTION
 
-This is a very basic Pid management object, it doesn't do all that 
+This is a very basic Pid management object, it doesn't do all that
 much, and mostly just serves as a base class for L<MooseX::Daemonize::Pid::File>.
 
 =head1 ATTRIBUTES
@@ -43,7 +43,7 @@ much, and mostly just serves as a base class for L<MooseX::Daemonize::Pid::File>
 
 =back
 
-=head1 METHODS 
+=head1 METHODS
 
 =over 4
 
@@ -54,7 +54,7 @@ that the parent process does not have a bad value stored in it.
 
 =item B<has_pid>
 
-This is a predicate method to tell you if your I<pid> attribute has 
+This is a predicate method to tell you if your I<pid> attribute has
 been initialized yet.
 
 =item B<is_running>
@@ -89,7 +89,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights 
+Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 This module is free software; you can redistribute it and/or

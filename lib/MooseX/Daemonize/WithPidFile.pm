@@ -2,7 +2,7 @@ package MooseX::Daemonize::WithPidFile;
 use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 
 use MooseX::Daemonize::Pid::File;
@@ -13,7 +13,7 @@ requires 'init_pidfile';
 
 has pidfile => (
     # NOTE:
-    # this should always be accessible 
+    # this should always be accessible
     # from the command line IMO
     # - SL
     metaclass => 'Getopt',
@@ -28,7 +28,7 @@ has pidfile => (
 after 'daemonize' => sub {
     my $self = shift;
     # NOTE:
-    # make sure that we do not have 
+    # make sure that we do not have
     # any bad PID values stashed around
     # - SL
     $self->pidfile->clear_pid;
@@ -65,8 +65,8 @@ MooseX::Daemonize::WithPidFile - A Role with the core daemonization and pidfile 
 
 =head1 DESCRIPTION
 
-This is a slightly extended basic daemonization Role, it provides 
-Pidfile management along with the core daemonization features 
+This is a slightly extended basic daemonization Role, it provides
+Pidfile management along with the core daemonization features
 found in L<MooseX::Daemonize::Core>.
 
 =head1 ATTRIBUTES
@@ -76,7 +76,7 @@ found in L<MooseX::Daemonize::Core>.
 =item I<pidfile (is => rw, isa => MooseX::Daemonize::Pid::File)>
 
 This attribute holds the L<MooseX::Daemonize::Pid::File> object used
-to manage the Pidfile. It will initialize the object using the 
+to manage the Pidfile. It will initialize the object using the
 C<init_pidfile> method (which is required by this role).
 
 =back
@@ -92,7 +92,7 @@ return a L<MooseX::Daemonize::Pid::File> object.
 
 =item B<has_pidfile>
 
-This is a predicate method to tell you if your I<pidfile> attribute has 
+This is a predicate method to tell you if your I<pidfile> attribute has
 been initialized yet.
 
 =back
@@ -103,7 +103,7 @@ been initialized yet.
 
 =item B<daemonize>
 
-This adds an C<after> method modifier to the C<daemonize> method (from 
+This adds an C<after> method modifier to the C<daemonize> method (from
 L<MooseX::Daemonize::Core>) and handles writing your Pidfile for you.
 
 =item B<meta>
@@ -134,7 +134,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 Portions heavily borrowed from L<Proc::Daemon> which is copyright Earl Hood.

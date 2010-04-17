@@ -1,4 +1,13 @@
 Revision history for MooseX-Daemonize
+
+0.10 Sat. April 17, 2010
+    - updated copyrights
+    - removed the POE test because it was causing
+      random failures when installing from CPAN
+      and not adding enough value to keep around
+    - applied POD corrections from RT #50091
+      (thanks to Kostyuk Oleg)
+
 0.09 2009-10-05
 	* s/no_plan => 1/'no_plan'/g (Dave Rolsky)
 	* Synchronize Version numbers
@@ -11,11 +20,11 @@ Revision history for MooseX-Daemonize
 
 0.07 Saturday, May 24, 2008
     * MooseX::Daemonize
-      - Made default pidbase '/var/run' rather 
+      - Made default pidbase '/var/run' rather
         than './var/run'
-      
+
     * t/
-      - Small fixups to pidfile testing in 
+      - Small fixups to pidfile testing in
         t/31.with_pid_file_and_poe.t
 
     ~ Removed the Build.PL since Module::Install
@@ -23,22 +32,22 @@ Revision history for MooseX-Daemonize
 
 0.06 Fri. Dec. 21, 2007
     * MooseX::Daemonize
-      - Fix logic that kills process so it doens't always warn 
+      - Fix logic that kills process so it doens't always warn
         about undead process
       - Added stop_timeout to allow user to control timings.
       - Refactored to roles
         - removed Proc::Daemon dependency
         - removed File::Pid dependency
-      - added exit_code and status_message to capture the 
+      - added exit_code and status_message to capture the
         exit code and a status message :)
         - refactored start/stop/restart to use these
         - added tests for this
       - added a &status command which returns a bool telling
         you if the daemon is running or not
         - added tests for this
-      
+
     * Test::MooseX::Daemonize
-      - updated docs 
+      - updated docs
       - removed Proc::Daemon dependency
 
     * MooseX::Daemonize::Core
@@ -51,27 +60,27 @@ Revision history for MooseX-Daemonize
 
     * MooseX::Daemonize::Pid
       - added this package to replace the File::Pid stuff
-      
+
     * MooseX::Daemonize::Pid::File
       - added this package to replace the File::Pid stuff, it is a subclass
         of MooseX::Daemonize::Pid (stevan)
         - added tests for this (stevan)
 
 0.05 2007-11-18
-    - Fix logic that kills process so it doens't always warn 
+    - Fix logic that kills process so it doens't always warn
       about undead process
     - Added stop_timeout to allow user to control timings.
 
 0.04 2007-11-11
-    - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were 
+    - Fix stupid perlcritic.t cause the Module::Starter::PBP tests were
       stupid but I didn't realize it.
 
 0.03 2007-10-22
     - Add File::Slurp to dependencies so our tests pass better
 
 0.02 Sept 19, 2007
-    - Fixed bug where sometimes the pidfile is writeable but pidbase is not -- reported by dec 
-    - Fixed bug where the pidfile wasn't being updated properly -- reported by dec 
+    - Fixed bug where sometimes the pidfile is writeable but pidbase is not -- reported by dec
+    - Fixed bug where the pidfile wasn't being updated properly -- reported by dec
     - Added is_daemon attribute
     - Added another fork to make sure we short circuit out of the daemonize process properly
     - Switch to File::Pid

@@ -3,11 +3,11 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION = "0.09";
+our $VERSION = "0.10";
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
-     
+
 sub OK    () { 0 }
 sub ERROR () { 1 }
 
@@ -116,15 +116,15 @@ sub start {
 
     if ($self->pidfile->is_running) {
         $self->exit_code($self->OK);
-        $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');        
+        $self->status_message('Daemon is already running with pid (' . $self->pidfile->pid . ')');
         return !($self->exit_code);
     }
-    
-    if ($self->foreground) { 
+
+    if ($self->foreground) {
         $self->is_daemon(1);
     }
-    else {      
-        eval { $self->daemonize };              
+    else {
+        eval { $self->daemonize };
         if ($@) {
             $self->exit_code($self->ERROR);
             $self->status_message('Start failed : ' . $@);
@@ -133,7 +133,7 @@ sub start {
     }
 
     unless ($self->is_daemon) {
-        $self->exit_code($self->OK);        
+        $self->exit_code($self->OK);
         $self->status_message('Start succeeded');
         return !($self->exit_code);
     }
@@ -155,10 +155,10 @@ sub status {
     $self->clear_exit_code;
 
     if ($self->pidfile->is_running) {
-        $self->exit_code($self->OK);        
-        $self->status_message('Daemon is running with pid (' . $self->pidfile->pid . ')');    
+        $self->exit_code($self->OK);
+        $self->status_message('Daemon is running with pid (' . $self->pidfile->pid . ')');
     }
-    else {            
+    else {
         $self->exit_code($self->ERROR);
         $self->status_message('Daemon is not running with pid (' . $self->pidfile->pid . ')');
     }
@@ -228,7 +228,7 @@ sub stop {
         # this just returns the OK
         # exit code for now, but
         # we should make this overridable
-        $self->exit_code($self->OK);        
+        $self->exit_code($self->OK);
         $self->status_message("Not running");
     }
 
@@ -357,11 +357,11 @@ The name of our daemon, defaults to C<$package_name =~ s/::/_/>;
 
 =item I<pidbase Path::Class::Dir | Str>
 
-The base for our bid, defaults to C</var/run/$progname>
+The base for our PID, defaults to C</var/run/>
 
 =item I<pidfile MooseX::Daemonize::Pid::File | Str>
 
-The file we store our PID in, defaults to C</var/run/$progname>
+The file we store our PID in, defaults to C<$pidbase/$progname.pid>
 
 =item I<foreground Bool>
 
@@ -537,7 +537,7 @@ Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2009, Chris Prather C<< <chris@prather.org> >>. Some rights
+Copyright (c) 2007-2010, Chris Prather C<< <chris@prather.org> >>. Some rights
 reserved.
 
 This module is free software; you can redistribute it and/or

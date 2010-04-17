@@ -6,7 +6,8 @@ name 'MooseX-Daemonize';
 all_from 'lib/MooseX/Daemonize.pm';
 
 # Specific dependencies
-build_requires 'Test::More'  => 0;
+build_requires 'Test::More'   => 0;
+build_requires 'Test::Moose'  => 0;
 
 requires 'Moose'                      => 0.33;
 requires 'MooseX::Getopt'             => 0.07;

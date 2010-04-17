@@ -3,7 +3,7 @@ use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use POSIX ();
 
@@ -232,9 +232,9 @@ I<ignore_zombies> behavior in the C<daemon_fork> method.
 
 =item I<dont_close_all_files>
 
-Setting this option to true will cause it to skip closing all the 
+Setting this option to true will cause it to skip closing all the
 filehandles, this is useful if you are opening things like sockets
-and such in the pre-fork. 
+and such in the pre-fork.
 
 =back
 
@@ -347,7 +347,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2008, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 Portions heavily borrowed from L<Proc::Daemon> which is copyright Earl Hood.
