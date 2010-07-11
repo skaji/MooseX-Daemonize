@@ -1,5 +1,8 @@
 Revision history for MooseX-Daemonize
 
+0.12 Sun. July 11, 2010
+    - release without the .git directory in it
+
 0.11 Sat. July 10, 2010
     * MooseX::Daemonize::Core
       - make the options to daemonize()

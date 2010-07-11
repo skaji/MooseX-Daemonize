@@ -2,7 +2,7 @@ package MooseX::Daemonize::Pid;
 use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
-our $VERSION   = '0.11';
+our $VERSION   = '0.12';
 
 coerce 'MooseX::Daemonize::Pid'
     => from 'Int'
