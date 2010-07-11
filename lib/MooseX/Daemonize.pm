@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION = "0.10";
+our $VERSION   = '0.11';
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
@@ -367,6 +367,23 @@ The file we store our PID in, defaults to C<$pidbase/$progname.pid>
 
 If true, the process won't background. Useful for debugging. This option can
 be set via Getopt's -f.
+
+=item I<no_double_fork Bool>
+
+If true, the process will not perform the typical double-fork, which is extra
+added protection from your process accidentally aquiring a controlling terminal.
+More information can be found by Googling "double fork daemonize".
+
+=item I<ignore_zombies Bool>
+
+If true, the process will not clean up zombie processes.
+Normally you don't want this.
+
+=item I<dont_close_all_files Bool>
+
+If true, the objects open filehandles will not be closed when daemonized.
+Normally you don't want this.
+
 
 =item I<is_daemon Bool>
 

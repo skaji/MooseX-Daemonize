@@ -1,5 +1,14 @@
 Revision history for MooseX-Daemonize
 
+0.11 Sat. July 10, 2010
+    * MooseX::Daemonize::Core
+      - make the options to daemonize()
+        into proper attributes but still
+        retained back-compat (Thanks to Magnus Erixzon)
+          - adjusted docs and tests
+
+    - removed the pod.t and pod-coverage.t tests
+
 0.10 Sat. April 17, 2010
     - updated copyrights
     - removed the POE test because it was causing

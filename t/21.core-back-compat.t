@@ -43,9 +43,10 @@ $ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
     sub start {
         my $self = shift;
         # tell it to ignore zombies ...
-        $self->ignore_zombies( 1 );
-        $self->no_double_fork( 1 );
-        $self->daemonize;
+        $self->daemonize(
+            ignore_zombies => 1,
+            no_double_fork => 1,
+        );
         return unless $self->is_daemon;
         # change to our local dir
         # so that we can debug easier

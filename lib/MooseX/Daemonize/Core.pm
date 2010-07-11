@@ -3,7 +3,7 @@ use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 
-our $VERSION = '0.10';
+our $VERSION   = '0.11';
 
 use POSIX ();
 
@@ -18,11 +18,43 @@ has is_daemon => (
     default   => sub { 0 },
 );
 
+has ignore_zombies => (
+    metaclass => 'Getopt',
+    isa       => 'Bool',
+    is        => 'rw',
+    default   => sub { 0 },
+);
+
+has no_double_fork => (
+    metaclass => 'Getopt',
+    isa       => 'Bool',
+    is        => 'rw',
+    default   => sub { 0 },
+);
+
+has dont_close_all_files => (
+    metaclass => 'Getopt',
+    isa       => 'Bool',
+    is        => 'rw',
+    default   => sub { 0 },
+);
+
+sub _get_options {
+    my ($self, %options) = @_;
+    # backwards compability.. old code might be calling daemon_fork/_detach with options
+    foreach my $opt (qw( ignore_zombies no_double_fork dont_close_all_files )) {
+        $self->$opt( $options{ $opt } ) if ( defined $options{ $opt } );
+    }
+}
+
+
 sub daemon_fork {
     my ($self, %options) = @_;
 
+    $self->_get_options( %options );
+
     $SIG{CHLD} = 'IGNORE'
-        if $options{ignore_zombies};
+        if $self->ignore_zombies;;
 
     if (my $pid = fork) {
         return $pid;
@@ -38,12 +70,13 @@ sub daemon_detach {
 
     return unless $self->is_daemon; # return if parent ...
 
+    $self->_get_options( %options );
     # now we are in the daemon ...
 
     (POSIX::setsid)  # set session id
         || confess "Cannot detach from controlling process";
 
-    unless ($options{no_double_fork}) {
+    unless ( $self->no_double_fork ) {
         $SIG{'HUP'} = 'IGNORE';
         fork && exit;
     }
@@ -51,7 +84,7 @@ sub daemon_detach {
     chdir '/';      # change to root directory
     umask 0;        # clear the file creation mask
 
-    unless ($options{dont_close_all_files}) {
+    unless ( $self->dont_close_all_files ) {
         # get the max numnber of possible file descriptors
         my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
         $openmax = 64 if !defined($openmax) || $openmax < 0;
@@ -153,37 +186,53 @@ responsibility (see some of the other roles in this distro for that).
 This attribute is used to signal if we are within the
 daemon process or not.
 
+=item I<no_double_fork (is => rw, isa => Bool)>
+
+Setting this attribute to true will cause this method to not perform the
+typical double-fork, which is extra added protection from your process
+accidentally aquiring a controlling terminal. More information can be
+found above, and by Googling "double fork daemonize".
+
+If you the double-fork behavior off, you might want to enable the
+I<ignore_zombies>.
+
+=item I<ignore_zombies (is => rw, isa => Bool)>
+
+Setting this attribute to a true value will result in setting the C<$SIG{CHLD}>
+handler to C<IGNORE>. This tells perl to clean up zombie processes. By
+default, and for the most part you don't I<need> it, only when you turn off
+the double fork behavior (with the I<no_double_fork> attribute)
+do you sometimes want this behavior.
+
+=item I<dont_close_all_files (is => rw, isa => Bool)>
+
+Setting this attribute to true will cause it to skip closing all the
+filehandles. This is useful if you are opening things like sockets
+and such in the pre-fork.
+
 =back
 
 =head1 METHODS
 
 =over
 
-=item B<daemon_fork (%options)>
+=item B<daemon_fork (?%options)>
 
 This forks off the child process to be daemonized. Just as with
 the built in fork, it returns the child pid to the parent process,
 0 to the child process. It will also set the is_daemon flag
 appropriately.
 
-The C<%options> available for this function are:
+The C<%options> argument remains for backwards compatability, but
+it is suggested that you use the attributes listed above instead.
 
-=over 4
-
-=item I<ignore_zombies>
-
-Setting this key to a true value will result in setting the C<$SIG{CHLD}>
-handler to C<IGNORE>. This tells perl to clean up zombie processes. By
-default, and for the most part you don't I<need> it, only when you turn off
-the double fork behavior (with the I<no_double_fork> option) in C<daemon_detach>
-do you sometimes want this behavior.
-
-=back
-
-=item B<daemon_detach (%options)>
+=item B<daemon_detach (?%options)>
 
 This detaches the new child process from the terminal by doing
 the following things.
+
+The C<%options> argument remains for backwards compatability, but
+it is suggested that you use the attributes listed above instead.
 
 =over 4
 
@@ -205,7 +254,8 @@ directory then simply change it later in your daemons code.
 
 =item Closes all open file descriptors.
 
-See below for information on how to change this part of the process.
+See the I<dont_close_all_files> attribute for information on how to
+change this part of the process.
 
 =item Reopen STDERR, STDOUT & STDIN to /dev/null
 
@@ -214,39 +264,17 @@ and MX_DAEMON_STDOUT environment variables. It will look for a filename
 in either of these variables and redirect STDOUT and/or STDERR to those
 files. This is useful for debugging and/or testing purposes.
 
-=back
-
-The C<%options> available for this function are:
-
-=over 4
-
-=item I<no_double_fork>
-
-Setting this option to true will cause this method to not perform the
-typical double-fork, which is extra added protection from your process
-accidentally aquiring a controlling terminal. More information can be
-found above, and by Googling "double fork daemonize".
-
-If you the double-fork behavior off, you might want to enable the
-I<ignore_zombies> behavior in the C<daemon_fork> method.
-
-=item I<dont_close_all_files>
-
-Setting this option to true will cause it to skip closing all the
-filehandles, this is useful if you are opening things like sockets
-and such in the pre-fork.
-
-=back
-
 B<NOTE>
 
 If called from within the parent process (the is_daemon flag is set to
 false), this method will simply return and do nothing.
 
-=item B<daemonize (%options)>
+=item B<daemonize (?%options)>
 
-This will simply call C<daemon_fork> followed by C<daemon_detach>, it will
-pass any C<%options> onto both methods.
+This will simply call C<daemon_fork> followed by C<daemon_detach>.
+
+The C<%options> argument remains for backwards compatability, but
+it is suggested that you use the attributes listed above instead.
 
 =item meta()
 
@@ -286,7 +314,7 @@ written enough so I decided to reproduce it here.
   terminal.
 
 That said, you don't always want this to be the behavior, so you are
-free to specify otherwise using the C<%options>.
+free to specify otherwise using the I<no_double_fork> attribute.
 
 =item Note about zombies
 
@@ -295,7 +323,7 @@ by the time you have double forked your daemon process is then owned by
 the init process. However, sometimes the double-fork is more than you
 really need, and you want to keep your daemon processes a little closer
 to you. In this case you have to watch out for zombies, you can avoid then
-by just setting the C<ignore_zombies> option (see above).
+by just setting the I<ignore_zombies> attribute (see above).
 
 =back
 

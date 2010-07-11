@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
 
-our $VERSION = '0.10';
+our $VERSION   = '0.11';
 
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;
