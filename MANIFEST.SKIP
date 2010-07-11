@@ -20,3 +20,6 @@ cover_db
 ^PLANS$
 ^benchmarks
 ^\._.*$
+IDEAS
+examples
+lab
