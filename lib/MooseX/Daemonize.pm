@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
@@ -342,6 +342,28 @@ Often you want to write a persistant daemon that has a pid file, and responds
 appropriately to Signals. This module provides a set of basic roles as an
 infrastructure to do that.
 
+=head1 CAVEATS
+
+When going into background MooseX::Daemonize closes all open file
+handles. This may interfere with you logging because it may also close the log
+file handle you want to write to. To prevent this you can either defer opening
+the log file until after start. Alternatively, use can use the
+'dont_close_all_files' option either from the command line or in your .sh
+script.
+
+Assuming you want to use Log::Log4perl for example you could expand the
+MooseX::Daemonize example above like this.
+
+    after start => sub {
+        my $self = shift;
+        return unless $self->is_daemon;
+        Log::Log4perl->init(\$log4perl_config);
+        my $logger = Log::Log4perl->get_logger();
+        $logger->info("Daemon started");
+        # your daemon code here ...
+    };
+
+
 =head1 ATTRIBUTES
 
 This list includes attributes brought in from other roles as well
@@ -554,7 +576,7 @@ Some bug fixes sponsored by Takkle Inc.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2010, Chris Prather C<< <chris@prather.org> >>. Some rights
+Copyright (c) 2007-2011, Chris Prather C<< <chris@prather.org> >>. Some rights
 reserved.
 
 This module is free software; you can redistribute it and/or

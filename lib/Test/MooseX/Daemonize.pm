@@ -1,7 +1,7 @@
 package Test::MooseX::Daemonize;
 use strict;
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
 # BEGIN CARGO CULTING
@@ -165,7 +165,7 @@ Chris Prather  C<< <perigrin@cpan.org> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserved.
+Copyright (c) 2007-2011, Chris Prather C<< <perigrin@cpan.org> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

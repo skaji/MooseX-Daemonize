@@ -3,7 +3,7 @@ use strict;    # because Kwalitee is pedantic
 use Moose;
 use Moose::Util::TypeConstraints;
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;
@@ -152,7 +152,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2011, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 This module is free software; you can redistribute it and/or

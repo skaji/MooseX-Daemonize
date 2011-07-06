@@ -1,5 +1,12 @@
 Revision history for MooseX-Daemonize
 
+0.13 Wed. July 6, 2011
+    - adding docs related to closing all
+      filehandles and the issues that can
+      cause with things like Log::Log4Perl
+      (thanks to Maik Hentsche via RT #67016)
+    - updating copyright dates
+
 0.12 Sun. July 11, 2010
     - release without the .git directory in it
 

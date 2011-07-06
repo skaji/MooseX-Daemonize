@@ -2,7 +2,7 @@ package MooseX::Daemonize::WithPidFile;
 use strict;         # cause Perl::Critic errors are annoying
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 
 
 use MooseX::Daemonize::Pid::File;
@@ -134,7 +134,7 @@ Stevan Little  C<< <stevan.little@iinteractive.com> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007-2010, Chris Prather C<< <perigrin@cpan.org> >>. All rights
+Copyright (c) 2007-2011, Chris Prather C<< <perigrin@cpan.org> >>. All rights
 reserved.
 
 Portions heavily borrowed from L<Proc::Daemon> which is copyright Earl Hood.
