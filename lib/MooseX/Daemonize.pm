@@ -569,7 +569,7 @@ L<http://rt.cpan.org>.
 
 =head1 SEE ALSO
 
-L<Proc::Daemon>, L<Daemon::Generic>
+L<Daemon::Control>, L<Proc::Daemon>, L<Daemon::Generic>
 
 =head1 AUTHORS
 
