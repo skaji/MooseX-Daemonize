@@ -2,6 +2,7 @@ package MooseX::Daemonize;
 use strict;    # because Kwalitee is pedantic
 use Moose::Role;
 use MooseX::Types::Path::Class;
+use File::Path qw(make_path);
 
 our $VERSION   = '0.13';
 
@@ -81,6 +82,15 @@ has exit_code => (
 sub init_pidfile {
     my $self = shift;
     my $file = $self->pidbase . '/' . $self->progname . '.pid';
+
+    if ( !-d $self->pidbase ) {
+        make_path( $self->pidbase, { error => \my $err } );
+        if (@$err) {
+            confess sprintf( "Cannot create pidbase directory '%s': %s",
+                $self->pidbase, @$err );
+        }
+    }
+
     confess "Cannot write to $file" unless (-e $file ? -w $file : -w $self->pidbase);
     MooseX::Daemonize::Pid::File->new( file => $file );
 }
