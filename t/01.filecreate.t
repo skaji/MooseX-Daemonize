@@ -45,7 +45,7 @@ $ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
 }
 
 my $app = FileMaker->new(
-    pidbase  => $dir,
+    pidbase  => "$dir/subdir",
     filename => $FILENAME,
 );
 isa_ok($app, 'FileMaker');
@@ -55,7 +55,7 @@ does_ok($app, 'MooseX::Daemonize::Core');
 
 isa_ok($app->pidfile, 'MooseX::Daemonize::Pid::File');
 
-is($app->pidfile->file, catfile($dir, "filemaker.pid"), '... got the right PID file path');
+is($app->pidfile->file, catfile("$dir/subdir", "filemaker.pid"), '... got the right PID file path');
 ok(not(-e $app->pidfile->file), '... our pidfile does not exist');
 
 ok(!$app->status, '... the daemon is running');
