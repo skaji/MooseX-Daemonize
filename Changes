@@ -1,5 +1,10 @@
 Revision history for MooseX-Daemonize
 
+0.14 Wed. May 30, 2012
+    - recommend Daemon::Control instead
+    - fix bug with pidbase dir not being created
+      if it doesn't already exist
+
 0.13 Wed. July 6, 2011
     - adding docs related to closing all
       filehandles and the issues that can
