@@ -316,6 +316,10 @@ MooseX::Daemonize - Role for daemonizing your Moose based application
 
 This document describes MooseX::Daemonize version 0.05
 
+=head1 WARNING
+
+The maintainers of this module now recommend using L<Daemon::Control> instead.
+
 =head1 SYNOPSIS
 
     package My::Daemon;
