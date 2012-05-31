@@ -314,7 +314,7 @@ MooseX::Daemonize - Role for daemonizing your Moose based application
 
 =head1 VERSION
 
-This document describes MooseX::Daemonize version 0.05
+This document describes MooseX::Daemonize version 0.15
 
 =head1 WARNING
 
