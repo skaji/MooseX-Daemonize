@@ -16,5 +16,8 @@ requires 'MooseX::Types::Path::Class' => 0;
 no_index 'directory' => 'examples';
 
 auto_manifest;
-auto_repository;
+
+# r/w: gitmo@git.moose.perl.org:MooseX-Daemonize.git
+repository 'git://git.moose.perl.org/MooseX-Daemonize.git';
+
 WriteAll;
