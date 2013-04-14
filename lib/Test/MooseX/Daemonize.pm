@@ -52,15 +52,16 @@ sub check_test_output {
 
            # We don't just call ok(!$not), because that generates diagnostics of
            # its own for failures. We only want the diagnostics from the child.
-            my $num = $Test->current_test;
-            $Test->current_test( ++$num );
-            $Test->_print("$status $num - $text\n");
+            my $orig_no_diag = $Test->no_diag;
+            $Test->no_diag(1);
+            $Test->ok(!$not, $text);
+            $Test->no_diag($orig_no_diag);
         }
         elsif ( $line =~ s/\A#\s?// ) {
             $Test->diag($line);
         }
         else {
-            $Test->_print_diag("$label: $line (unrecognised)\n");
+            $Test->diag("$label: $line (unrecognised)\n");
         }
     }
 }
