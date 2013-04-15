@@ -22,6 +22,7 @@ has progname => (
         ( my $name = lc $_[0]->meta->name ) =~ s/::/_/g;
         return $name;
     },
+    documentation => 'the name of the daemon',
 );
 
 has pidbase => (
@@ -32,6 +33,7 @@ has pidbase => (
     required  => 1,
     lazy      => 1,
     default   => sub { Path::Class::Dir->new('', 'var', 'run') },
+    documentation => 'the base for our pid (default: /var/run)',
 );
 
 has basedir => (
@@ -42,6 +44,7 @@ has basedir => (
     required  => 1,
     lazy      => 1,
     default   => sub { Path::Class::Dir->new('/') },
+    documentation => 'the directory to chdir to (default: /)',
 );
 
 has foreground => (
@@ -50,13 +53,15 @@ has foreground => (
     isa         => 'Bool',
     is          => 'ro',
     default     => sub { 0 },
+    documentation => 'if true, the process won\'t background',
 );
 
 has stop_timeout => (
     metaclass => 'Getopt',
     isa       => 'Int',
     is        => 'rw',
-    default   => sub { 2 }
+    default   => sub { 2 },
+    documentation => 'number of seconds to wait for the process to stop, before trying harder to kill it (default: 2 s)',
 );
 
 # internal book-keeping
