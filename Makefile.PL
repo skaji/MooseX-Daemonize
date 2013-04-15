@@ -12,6 +12,7 @@ build_requires 'Test::Moose'  => 0;
 requires 'Moose'                      => 0.33;
 requires 'MooseX::Getopt'             => 0.07;
 requires 'MooseX::Types::Path::Class' => 0;
+requires 'File::Path'                 => 2.08;
 
 no_index 'directory' => 'examples';
 
