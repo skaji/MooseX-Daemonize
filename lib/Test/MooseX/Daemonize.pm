@@ -1,7 +1,7 @@
 package Test::MooseX::Daemonize;
 use strict;
 
-our $VERSION   = '0.15';
+our $VERSION   = '0.16';
 our $AUTHORITY = 'cpan:PERIGRIN';
 
 # BEGIN CARGO CULTING

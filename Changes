@@ -1,5 +1,6 @@
 Revision history for MooseX-Daemonize
 
+0.16  2013-04-14
     - fix incompatibilities with Test::Builder 1.005+ (schwern, RT#76523)
     - add missing dependency on the version of File::Path which added
       make_path (RT#79169, Jonathan Sailor)
