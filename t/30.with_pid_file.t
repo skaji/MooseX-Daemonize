@@ -6,7 +6,7 @@ use warnings;
 use File::Spec::Functions;
 
 use Test::More 'no_plan';
-use Test::Exception;
+use Test::Fatal;
 use Test::Moose;
 use File::Temp qw(tempdir);
 
@@ -73,9 +73,11 @@ ok($d->has_pidfile, '... we have a pidfile value');
 
 ok(!(-e $PIDFILE), '... the PID file does not exist yet');
 
-lives_ok {
-    $d->start;
-} '... successfully daemonized from (' . $$ . ')';
+is(
+    exception { $d->start },
+    undef,
+    '... successfully daemonized from (' . $$ . ')',
+);
 
 my $p = $d->pidfile;
 isa_ok($p, 'MooseX::Daemonize::Pid::File');

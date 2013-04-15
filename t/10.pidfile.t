@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 25;
-use Test::Exception;
+use Test::Fatal;
 
 BEGIN {
     use_ok('MooseX::Daemonize::Pid::File');
@@ -20,17 +20,21 @@ BEGIN {
 
     is($f->pid, $$, '... the PID is our current process');
 
-    lives_ok {
-        $f->write
-    } '... writing the PID file';
+    is(
+        exception { $f->write },
+        undef,
+        '... writing the PID file',
+    );
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
     
     ok($f->is_running, '... it is running too');
 
-    lives_ok {
-        $f->remove
-    } '... removing the PID file';
+    is(
+        exception { $f->remove },
+        undef,
+        '... removing the PID file',
+    );
 
     ok(!-e $f->file, '... the PID file does not exist anymore');
 }
@@ -43,18 +47,22 @@ BEGIN {
 
     isa_ok($f->file, 'Path::Class::File');
 
-    lives_ok {
-        $f->write
-    } '... writing the PID file';
+    is(
+        exception { $f->write },
+        undef,
+        '... writing the PID file',
+    );
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
     is($f->pid, $$, '... the PID is our current process');
     
     ok($f->is_running, '... it is running too');    
 
-    lives_ok {
-        $f->remove
-    } '... removing the PID file';
+    is(
+        exception { $f->remove },
+        undef,
+        '... removing the PID file',
+    );
 
     ok(!-e $f->file, '... the PID file does not exist anymore');
 }
@@ -72,17 +80,21 @@ BEGIN {
     
     is($f->pid, $PID, '... the PID is our made up PID');
 
-    lives_ok {
-        $f->write
-    } '... writing the PID file';
+    is(
+        exception { $f->write },
+        undef,
+        '... writing the PID file',
+    );
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
 
     ok(!$f->is_running, '... it is not running (cause we made the PID up)');
 
-    lives_ok {
-        $f->remove
-    } '... removing the PID file';
+    is(
+        exception { $f->remove },
+        undef,
+        '... removing the PID file',
+    );
 
     ok(!-e $f->file, '... the PID file does not exist anymore');
 }
