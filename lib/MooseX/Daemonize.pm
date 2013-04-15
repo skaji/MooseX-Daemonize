@@ -395,6 +395,10 @@ The name of our daemon, defaults to C<$package_name =~ s/::/_/>;
 
 The base for our PID, defaults to C</var/run/>
 
+=item I<basedir Path::Class::Dir | Str>
+
+The directory we chdir to; defaults to C</>.
+
 =item I<pidfile MooseX::Daemonize::Pid::File | Str>
 
 The file we store our PID in, defaults to C<$pidbase/$progname.pid>
