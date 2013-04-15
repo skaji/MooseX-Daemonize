@@ -3,7 +3,7 @@ use warnings;
 
 use File::Spec::Functions;
 
-use Test::More 'no_plan';
+use Test::More;
 use Test::Fatal;
 use Test::Moose;
 use File::Temp qw(tempdir);
@@ -108,3 +108,6 @@ ok(!(-e $PIDFILE), '... the PID file has been removed');
 
 unlink $ENV{MX_DAEMON_STDOUT};
 unlink $ENV{MX_DAEMON_STDERR};
+
+done_testing;
+

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More 'no_plan';
+use Test::More;
 use Test::Builder;
 use Test::MooseX::Daemonize;
 use MooseX::Daemonize;
@@ -59,4 +59,7 @@ is($warnings, "", "No warnings from stop");
 
 check_test_output($app);
 unlink( $app->test_output );
+
+done_testing;
+
 exit;

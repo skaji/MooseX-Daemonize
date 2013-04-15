@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More 'no_plan';
+use Test::More;
 use Test::Fatal;
 use Test::Moose;
 use File::Temp qw(tempdir);
@@ -100,4 +100,5 @@ ok(!$p->is_running, '... the daemon process is no longer running (' . $p->pid . 
 unlink $ENV{MX_DAEMON_STDOUT};
 unlink $ENV{MX_DAEMON_STDERR};
 
+done_testing;
 
