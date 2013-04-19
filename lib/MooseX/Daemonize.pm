@@ -4,8 +4,6 @@ use Moose::Role;
 use MooseX::Types::Path::Class;
 use File::Path qw(make_path);
 
-our $VERSION   = '0.16';
-
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
 
