@@ -100,10 +100,6 @@ __END__
 
 Test::MooseX::Daemonize - Tool to help test MooseX::Daemonize applications
 
-=head1 VERSION
-
-This document describes MooseX::Daemonize version 0.0.1
-
 =head1 SYNOPSIS
 
     use File::Spec::Functions;
