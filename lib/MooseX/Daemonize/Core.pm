@@ -280,6 +280,8 @@ The C<meta()> method from L<Class::MOP::Class>
 
 =back
 
+=back
+
 =head1 STUFF YOU SHOULD READ
 
 =over 4
