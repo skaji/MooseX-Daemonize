@@ -1,5 +1,6 @@
 Revision history for MooseX-Daemonize
 
+{{ $NEXT }}
     - make tests a bit more tolerant of slow systems, by waiting longer for
       processes to die (RT#85229, Chisel Wright)
 
