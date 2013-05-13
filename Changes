@@ -1,6 +1,8 @@
 Revision history for MooseX-Daemonize
 
 {{ $NEXT }}
+
+0.18      2013-05-13 12:34:52 PDT-0700
     - make tests a bit more tolerant of slow systems, by waiting longer for
       processes to die (RT#85229, Chisel Wright)
 
