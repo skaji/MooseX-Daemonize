@@ -88,7 +88,14 @@ if (DEBUG) {
 }
 kill INT => $p->pid;
 diag "killed $pid" if DEBUG;
-sleep(2);
+
+# give the process time to be killed on slow/loaded systems
+for (1..10) {
+    last unless kill 0 => $pid;
+    # sleep a little before retrying
+    sleep(2);
+}
+
 if (DEBUG) {
     diag `ps $pid`;
     diag "-------";
