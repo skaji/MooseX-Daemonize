@@ -213,7 +213,7 @@ sub stop {
     $self->clear_exit_code;
 
     # if the pid is not running
-    # then we dont need to stop
+    # then we don't need to stop
     # anything ...
     if ($self->pidfile->is_running) {
 
@@ -351,7 +351,7 @@ The maintainers of this module now recommend using L<Daemon::Control> instead.
 
 =head1 DESCRIPTION
 
-Often you want to write a persistant daemon that has a pid file, and responds
+Often you want to write a persistent daemon that has a pid file, and responds
 appropriately to Signals. This module provides a set of basic roles as an
 infrastructure to do that.
 
@@ -410,7 +410,7 @@ be set via Getopt's -f.
 =item I<no_double_fork Bool>
 
 If true, the process will not perform the typical double-fork, which is extra
-added protection from your process accidentally aquiring a controlling terminal.
+added protection from your process accidentally acquiring a controlling terminal.
 More information can be found by Googling "double fork daemonize".
 
 =item I<ignore_zombies Bool>
@@ -534,7 +534,7 @@ Handle a HUP signal. By default calls C<$self->restart()>
 
 =head2 Exit Code Methods
 
-These are overriable constant methods used for setting the exit code.
+These are overridable constant methods used for setting the exit code.
 
 =over 4
 

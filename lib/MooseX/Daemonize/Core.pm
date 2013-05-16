@@ -39,7 +39,7 @@ has dont_close_all_files => (
 
 sub _get_options {
     my ($self, %options) = @_;
-    # backwards compability.. old code might be calling daemon_fork/_detach with options
+    # backwards compatibility.. old code might be calling daemon_fork/_detach with options
     foreach my $opt (qw( ignore_zombies no_double_fork dont_close_all_files )) {
         $self->$opt( $options{ $opt } ) if ( defined $options{ $opt } );
     }
@@ -83,7 +83,7 @@ sub daemon_detach {
     umask 0;        # clear the file creation mask
 
     unless ( $self->dont_close_all_files ) {
-        # get the max numnber of possible file descriptors
+        # get the max number of possible file descriptors
         my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
         $openmax = 64 if !defined($openmax) || $openmax < 0;
 
@@ -188,7 +188,7 @@ daemon process or not.
 
 Setting this attribute to true will cause this method to not perform the
 typical double-fork, which is extra added protection from your process
-accidentally aquiring a controlling terminal. More information can be
+accidentally acquiring a controlling terminal. More information can be
 found above, and by Googling "double fork daemonize".
 
 If you the double-fork behavior off, you might want to enable the
@@ -221,7 +221,7 @@ the built in fork, it returns the child pid to the parent process,
 0 to the child process. It will also set the is_daemon flag
 appropriately.
 
-The C<%options> argument remains for backwards compatability, but
+The C<%options> argument remains for backwards compatibility, but
 it is suggested that you use the attributes listed above instead.
 
 =item B<daemon_detach (?%options)>
@@ -229,7 +229,7 @@ it is suggested that you use the attributes listed above instead.
 This detaches the new child process from the terminal by doing
 the following things.
 
-The C<%options> argument remains for backwards compatability, but
+The C<%options> argument remains for backwards compatibility, but
 it is suggested that you use the attributes listed above instead.
 
 =over 4
@@ -271,7 +271,7 @@ false), this method will simply return and do nothing.
 
 This will simply call C<daemon_fork> followed by C<daemon_detach>.
 
-The C<%options> argument remains for backwards compatability, but
+The C<%options> argument remains for backwards compatibility, but
 it is suggested that you use the attributes listed above instead.
 
 =item meta()
