@@ -12,7 +12,7 @@ my $dir = tempdir( CLEANUP => 1 );
 
 
 BEGIN {
-    use_ok('MooseX::Daemonize::Core');  
+    use_ok('MooseX::Daemonize::Core');
 }
 
 use constant DEBUG => 0;
@@ -24,33 +24,33 @@ $ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
 {
     package MyFooDaemon;
     use Moose;
-    
+
     with 'MooseX::Daemonize::WithPidFile';
-         
+
     sub init_pidfile {
         MooseX::Daemonize::Pid::File->new( file => $PIDFILE )
     }
-    
+
     sub start {
         my $self = shift;
-        
-        # this tests our bad PID 
+
+        # this tests our bad PID
         # cleanup functionality.
         print "Our parent PID is " . $self->pidfile->pid . "\n" if ::DEBUG;
-        
+
         $self->daemonize;
         return unless $self->is_daemon;
-        
+
         # make it easy to find with ps
         $0 = 'test-app-2';
-        $SIG{INT} = sub { 
-            print "Got INT! Oh Noes!"; 
+        $SIG{INT} = sub {
+            print "Got INT! Oh Noes!";
             $self->pidfile->remove;
             exit;
-        };      
+        };
         while (1) {
-            print "Hello from $$\n"; 
-            sleep(10);       
+            print "Hello from $$\n";
+            sleep(10);
         }
         exit;
     }

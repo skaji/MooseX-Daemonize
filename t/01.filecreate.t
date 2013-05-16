@@ -26,8 +26,8 @@ $ENV{MX_DAEMON_STDERR} = catfile($dir, 'Err.txt');
     with qw(MooseX::Daemonize);
 
     has filename => ( isa => 'Str', is => 'ro' );
-    
-    after start => sub { 
+
+    after start => sub {
         my $self = shift;
         if ($self->is_daemon) {
             $self->create_file( $self->filename );
@@ -82,14 +82,14 @@ is($app->exit_code, MooseX::Daemonize->OK, '... got the right error code');
 
 if (DEBUG) {
     diag `ps $pid`;
-    diag "Status is: " . $app->status_message;    
+    diag "Status is: " . $app->status_message;
 }
 
 ok( -e $app->filename, "file exists" );
 
 if (DEBUG) {
     diag `ps $pid`;
-    diag "Status is: " . $app->status_message;    
+    diag "Status is: " . $app->status_message;
 }
 
 ok( $app->stop, '... app stopped' );
@@ -102,7 +102,7 @@ is($app->exit_code, MooseX::Daemonize->ERROR, '... got the right error code');
 
 if (DEBUG) {
     diag `ps $pid`;
-    diag "Status is: " . $app->status_message;    
+    diag "Status is: " . $app->status_message;
 }
 
 ok( not(-e $app->pidfile->file) , '... pidfile gone' );

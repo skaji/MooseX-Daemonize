@@ -25,7 +25,7 @@ BEGIN {
     );
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
-    
+
     ok($f->is_running, '... it is running too');
 
     is(
@@ -53,8 +53,8 @@ BEGIN {
 
     is($f->file->slurp(chomp => 1), $f->pid, '... the PID in the file is correct');
     is($f->pid, $$, '... the PID is our current process');
-    
-    ok($f->is_running, '... it is running too');    
+
+    ok($f->is_running, '... it is running too');
 
     is(
         exception { $f->remove },
@@ -67,7 +67,7 @@ BEGIN {
 
 {
     my $PID = 9999;
-    
+
     my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'baz.pid' ],
         pid  => $PID,
@@ -75,7 +75,7 @@ BEGIN {
     isa_ok($f, 'MooseX::Daemonize::Pid::File');
 
     isa_ok($f->file, 'Path::Class::File');
-    
+
     is($f->pid, $PID, '... the PID is our made up PID');
 
     is(

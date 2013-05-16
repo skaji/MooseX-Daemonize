@@ -17,7 +17,7 @@ my $Test = Test::Builder->new;
 
     after start => sub {
         my ($self) = @_;
-        $self->output_ok() 
+        $self->output_ok()
             if $self->is_daemon;
     };
 
@@ -51,8 +51,8 @@ sleep(3);    # give ourself a chance to produce some output
 
 my $warnings = "";
 {
-	local $SIG{__WARN__} = sub { $warnings .= $_[0]; warn @_ };
-	$app->stop( no_exit => 1 );
+    local $SIG{__WARN__} = sub { $warnings .= $_[0]; warn @_ };
+    $app->stop( no_exit => 1 );
 }
 
 is($warnings, "", "No warnings from stop");
