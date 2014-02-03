@@ -66,7 +66,11 @@ BEGIN {
 }
 
 {
-    my $PID = 9999;
+    # find a pid that doesn't currently exist - start by looking at our own
+    # and going backwards (not 100% reliable but better than hardcoding one)
+    my $PID = $$;
+    do { $PID--; $PID = 2**32 if $PID < 1 } while kill(0, $PID);
+    diag 'assigning the non-existent pid ' . $PID;
 
     my $f = MooseX::Daemonize::Pid::File->new(
         file => [ 't', 'baz.pid' ],

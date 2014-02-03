@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+    - fix buggy test that does not try hard enough to look for a nonexistent
+      pid (ether)
 
 0.18      2013-05-13 19:34:52Z
     - make tests a bit more tolerant of slow systems, by waiting longer for
