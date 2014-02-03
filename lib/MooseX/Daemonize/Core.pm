@@ -1,5 +1,7 @@
+use strict;
+use warnings;
 package MooseX::Daemonize::Core;
-use strict;         # cause Perl::Critic errors are annoying
+
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 

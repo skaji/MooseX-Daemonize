@@ -1,8 +1,9 @@
+use strict;
+use warnings;
 package MooseX::Daemonize::WithPidFile;
-use strict;         # cause Perl::Critic errors are annoying
+
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
-
 
 use MooseX::Daemonize::Pid::File;
 

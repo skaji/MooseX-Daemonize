@@ -1,5 +1,7 @@
+use strict;
+use warnings;
 package MooseX::Daemonize;
-use strict;    # because Kwalitee is pedantic
+
 use Moose::Role;
 use MooseX::Types::Path::Class;
 use File::Path qw(make_path);

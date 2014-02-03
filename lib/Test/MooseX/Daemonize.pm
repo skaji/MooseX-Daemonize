@@ -1,5 +1,6 @@
-package Test::MooseX::Daemonize;
 use strict;
+use warnings;
+package Test::MooseX::Daemonize;
 
 our $AUTHORITY = 'cpan:PERIGRIN';
 

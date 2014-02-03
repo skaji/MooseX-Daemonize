@@ -1,5 +1,7 @@
+use strict;
+use warnings;
 package MooseX::Daemonize::Pid;
-use strict;    # because Kwalitee is pedantic
+
 use Moose;
 use Moose::Util::TypeConstraints;
 
