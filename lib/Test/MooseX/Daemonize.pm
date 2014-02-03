@@ -3,23 +3,14 @@ use warnings;
 package Test::MooseX::Daemonize;
 
 # BEGIN CARGO CULTING
-use Sub::Exporter;
+use Sub::Exporter::ForMethods 'method_installer';
+use Sub::Exporter -setup => {
+    exports => [ qw(daemonize_ok check_test_output) ],
+    groups  => { default => [ qw(daemonize_ok check_test_output) ] },
+    installer => method_installer,
+};
+
 use Test::Builder;
-
-
-{
-    my @exports = qw[
-      daemonize_ok
-      check_test_output
-    ];
-
-    Sub::Exporter::setup_exporter(
-        {
-            exports => \@exports,
-            groups  => { default => \@exports }
-        }
-    );
-}
 
 our $Test = Test::Builder->new;
 

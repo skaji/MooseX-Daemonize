@@ -4,8 +4,8 @@ package MooseX::Daemonize::Core;
 
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
-
 use POSIX ();
+use namespace::autoclean;
 
 has is_daemon => (
     # NOTE:

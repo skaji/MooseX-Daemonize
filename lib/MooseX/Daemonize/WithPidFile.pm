@@ -4,6 +4,7 @@ package MooseX::Daemonize::WithPidFile;
 
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
+use namespace::autoclean;
 
 use MooseX::Daemonize::Pid::File;
 

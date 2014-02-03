@@ -4,6 +4,7 @@ package MooseX::Daemonize::Pid;
 
 use Moose;
 use Moose::Util::TypeConstraints;
+use namespace::autoclean;
 
 coerce 'MooseX::Daemonize::Pid'
     => from 'Int'

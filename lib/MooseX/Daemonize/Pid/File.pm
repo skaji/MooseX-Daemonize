@@ -7,6 +7,7 @@ use Moose::Util::TypeConstraints;
 
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;
+use namespace::autoclean;
 
 # NOTE:
 # set up some basic coercions

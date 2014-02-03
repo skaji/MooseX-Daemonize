@@ -5,6 +5,7 @@ package MooseX::Daemonize;
 use Moose::Role;
 use MooseX::Types::Path::Class;
 use File::Path qw(make_path);
+use namespace::autoclean;
 
 with 'MooseX::Daemonize::WithPidFile',
      'MooseX::Getopt';
