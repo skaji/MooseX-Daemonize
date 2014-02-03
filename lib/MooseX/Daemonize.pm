@@ -573,7 +573,7 @@ None reported. Although obviously this will not work on Windows.
 No bugs have been reported.
 
 Please report any bugs or feature requests to
-C<bug-acme-dahut-call@rt.cpan.org>, or through the web interface at
+C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
 =head1 SEE ALSO
