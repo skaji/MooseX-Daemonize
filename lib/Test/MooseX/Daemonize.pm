@@ -35,8 +35,8 @@ sub check_test_output {
     while ( my $line = <$stdout_in> ) {
         $line =~ s/\s+\z//;
         my $label;
-        if ( $line =~ /\A((not\s+)?ok)(?:\s+-)(?:\s+(.*))\z/ ) {
-            my ( $status, $not, $text ) = ( $1, $2, $3 );
+        if ( $line =~ /\A(?:(not\s+)?ok)(?:\s+-)(?:\s+(.*))\z/ ) {
+            my ( $not, $text ) = ( $1, $2, $3 );
             $text ||= '';
 
            # We don't just call ok(!$not), because that generates diagnostics of
