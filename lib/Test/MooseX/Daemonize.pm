@@ -2,8 +2,6 @@ use strict;
 use warnings;
 package Test::MooseX::Daemonize;
 
-our $AUTHORITY = 'cpan:PERIGRIN';
-
 # BEGIN CARGO CULTING
 use Sub::Exporter;
 use Test::Builder;
@@ -67,6 +65,7 @@ sub check_test_output {
 }
 
 package Test::MooseX::Daemonize::Testable;
+
 use Moose::Role;
 
 has test_output => (
