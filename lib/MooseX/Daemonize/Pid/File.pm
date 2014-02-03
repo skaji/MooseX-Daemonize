@@ -5,8 +5,6 @@ package MooseX::Daemonize::Pid::File;
 use Moose;
 use Moose::Util::TypeConstraints;
 
-our $VERSION   = '0.15';
-
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;
 
