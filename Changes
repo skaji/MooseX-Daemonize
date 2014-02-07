@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.19      2014-02-07 04:19:25Z
     - fix buggy test that does not try hard enough to look for a nonexistent
       pid (ether)
     - repository moved to github moose organization
