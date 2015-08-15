@@ -6,11 +6,9 @@ package Test::MooseX::Daemonize;
 our $VERSION = '0.20';
 
 # BEGIN CARGO CULTING
-use Sub::Exporter::ForMethods 'method_installer';
 use Sub::Exporter -setup => {
     exports => [ qw(daemonize_ok check_test_output) ],
     groups  => { default => [ qw(daemonize_ok check_test_output) ] },
-    installer => method_installer,
 };
 
 use Test::Builder;
