@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package MooseX::Daemonize;
 
+our $VERSION = '0.20';
+
 use Moose::Role;
 use MooseX::Types::Path::Class;
 use File::Path qw(make_path);

@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package MooseX::Daemonize::WithPidFile;
 
+our $VERSION = '0.20';
+
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
 use namespace::autoclean;

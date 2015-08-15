@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package MooseX::Daemonize::Core;
 
+our $VERSION = '0.20';
+
 use MooseX::Getopt; # to load the NoGetopt metaclass
 use Moose::Role;
 use POSIX ();

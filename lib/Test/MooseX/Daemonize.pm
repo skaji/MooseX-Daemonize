@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package Test::MooseX::Daemonize;
 
+our $VERSION = '0.20';
+
 # BEGIN CARGO CULTING
 use Sub::Exporter::ForMethods 'method_installer';
 use Sub::Exporter -setup => {

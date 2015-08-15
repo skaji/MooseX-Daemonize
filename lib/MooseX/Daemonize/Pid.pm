@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package MooseX::Daemonize::Pid;
 
+our $VERSION = '0.20';
+
 use Moose;
 use Moose::Util::TypeConstraints qw(coerce from via);
 use namespace::autoclean;
