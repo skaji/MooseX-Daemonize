@@ -3,7 +3,7 @@ use warnings;
 package MooseX::Daemonize::Pid::File;
 
 use Moose;
-use Moose::Util::TypeConstraints;
+use Moose::Util::TypeConstraints qw(coerce from via);
 
 use MooseX::Types::Path::Class;
 use MooseX::Getopt::OptionTypeMap;

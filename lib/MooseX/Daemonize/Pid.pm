@@ -3,7 +3,7 @@ use warnings;
 package MooseX::Daemonize::Pid;
 
 use Moose;
-use Moose::Util::TypeConstraints;
+use Moose::Util::TypeConstraints qw(coerce from via);
 use namespace::autoclean;
 
 coerce 'MooseX::Daemonize::Pid'
