@@ -581,7 +581,7 @@ L<Daemon::Control>, L<Proc::Daemon>, L<Daemon::Generic>
 =head1 THANKS
 
 Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the
-#moose denzians
+#moose denizens
 
 Some bug fixes sponsored by Takkle Inc.
 
