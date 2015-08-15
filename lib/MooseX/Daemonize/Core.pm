@@ -355,14 +355,10 @@ L<Moose::Role>, L<POSIX>
 
 =head1 INCOMPATIBILITIES
 
-None reported.
-
 =head1 BUGS AND LIMITATIONS
 
-No bugs have been reported.
-
 Please report any bugs or feature requests to
-C<bug-acme-dahut-call@rt.cpan.org>, or through the web interface at
+C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
 =head1 SEE ALSO

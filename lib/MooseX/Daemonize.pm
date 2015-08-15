@@ -569,11 +569,9 @@ L<Moose>, L<MooseX::Getopt>, L<MooseX::Types::Path::Class> and L<POSIX>
 
 =head1 INCOMPATIBILITIES
 
-None reported. Although obviously this will not work on Windows.
+Obviously this will not work on Windows.
 
 =head1 BUGS AND LIMITATIONS
-
-No bugs have been reported.
 
 Please report any bugs or feature requests to
 C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
