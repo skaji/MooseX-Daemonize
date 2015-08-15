@@ -238,7 +238,7 @@ it is suggested that you use the attributes listed above instead.
 =item Becomes a session leader
 
 This detaches the program from the controlling terminal, it is
-accomplished by calling POSIX::setsid.
+accomplished by calling C<POSIX::setsid>.
 
 =item Performing the double-fork
 
@@ -258,14 +258,14 @@ change this part of the process.
 
 =item Reopen STDERR, STDOUT & STDIN to /dev/null
 
-This behavior can be controlled slightly though the MX_DAEMON_STDERR
-and MX_DAEMON_STDOUT environment variables. It will look for a filename
-in either of these variables and redirect STDOUT and/or STDERR to those
+This behavior can be controlled slightly though the C<MX_DAEMON_STDERR>
+and C<MX_DAEMON_STDOUT> environment variables. It will look for a filename
+in either of these variables and redirect C<STDOUT> and/or C<STDERR> to those
 files. This is useful for debugging and/or testing purposes.
 
 B<NOTE>
 
-If called from within the parent process (the is_daemon flag is set to
+If called from within the parent process (the C<is_daemon> flag is set to
 false), this method will simply return and do nothing.
 
 =item B<daemonize (?%options)>
@@ -331,18 +331,18 @@ by just setting the I<ignore_zombies> attribute (see above).
 =head1 ENVIRONMENT VARIABLES
 
 These variables are best just used for debugging and/or testing, but
-not used for actual logging. For that, you should reopen STDOUT/ERR on
+not used for actual logging. For that, you should reopen C<STDOUT>/C<STDERR> on
 your own.
 
 =over 4
 
 =item B<MX_DAEMON_STDOUT>
 
-A filename to redirect the daemon STDOUT to.
+A filename to redirect the daemon C<STDOUT> to.
 
 =item B<MX_DAEMON_STDERR>
 
-A filename to redirect the daemon STDERR to.
+A filename to redirect the daemon C<STDERR> to.
 
 =back
 

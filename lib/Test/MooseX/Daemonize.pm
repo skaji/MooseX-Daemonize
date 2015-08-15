@@ -104,8 +104,8 @@ __END__
 
 =head1 DESCRIPTION
 
-This module provides some basic Test::Builder compatible test methods to
-use when writing tests for you MooseX::Daemonize based modules.
+This module provides some basic L<Test::Builder>-compatible test methods to
+use when writing tests for your L<MooseX::Daemonize>-based modules.
 
 =head1 EXPORTED FUNCTIONS
 
