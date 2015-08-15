@@ -1,4 +1,6 @@
 /.ackrc
 /.build/
+!/.gitignore
+/.latest
 /MooseX-Daemonize-*/
 /MooseX-Daemonize-*.tar.gz
