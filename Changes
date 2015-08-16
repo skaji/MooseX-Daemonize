@@ -1,6 +1,7 @@
 Revision history for MooseX-Daemonize
 
 {{$NEXT}}
+    - some tooling modernization and documentation cleanup.
 
 0.19      2014-02-07 04:19:25Z
     - fix buggy test that does not try hard enough to look for a nonexistent
