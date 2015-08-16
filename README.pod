@@ -1,0 +1,339 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+MooseX::Daemonize - Role for daemonizing your Moose based application
+
+=head1 VERSION
+
+version 0.20
+
+=head1 SYNOPSIS
+
+    package My::Daemon;
+    use Moose;
+
+    with qw(MooseX::Daemonize);
+
+    # ... define your class ....
+
+    after start => sub {
+        my $self = shift;
+        return unless $self->is_daemon;
+        # your daemon code here ...
+    };
+
+    # then in your script ...
+
+    my $daemon = My::Daemon->new_with_options();
+
+    my ($command) = @{$daemon->extra_argv}
+    defined $command || die "No command specified";
+
+    $daemon->start   if $command eq 'start';
+    $daemon->status  if $command eq 'status';
+    $daemon->restart if $command eq 'restart';
+    $daemon->stop    if $command eq 'stop';
+
+    warn($daemon->status_message);
+    exit($daemon->exit_code);
+
+=head1 DESCRIPTION
+
+Often you want to write a persistent daemon that has a pid file, and responds
+appropriately to Signals. This module provides a set of basic roles as an
+infrastructure to do that.
+
+=head1 WARNING
+
+The maintainers of this module now recommend using L<Daemon::Control> instead.
+
+=head1 CAVEATS
+
+When going into background MooseX::Daemonize closes all open file
+handles. This may interfere with you logging because it may also close the log
+file handle you want to write to. To prevent this you can either defer opening
+the log file until after start. Alternatively, use can use the
+'dont_close_all_files' option either from the command line or in your .sh
+script.
+
+Assuming you want to use Log::Log4perl for example you could expand the
+MooseX::Daemonize example above like this.
+
+    after start => sub {
+        my $self = shift;
+        return unless $self->is_daemon;
+        Log::Log4perl->init(\$log4perl_config);
+        my $logger = Log::Log4perl->get_logger();
+        $logger->info("Daemon started");
+        # your daemon code here ...
+    };
+
+=head1 ATTRIBUTES
+
+This list includes attributes brought in from other roles as well
+we include them here for ease of documentation. All of these attributes
+are settable though L<MooseX::Getopt>'s command line handling, with the
+exception of C<is_daemon>.
+
+=over
+
+=item I<progname Path::Class::Dir | Str>
+
+The name of our daemon, defaults to C<$package_name =~ s/::/_/>;
+
+=item I<pidbase Path::Class::Dir | Str>
+
+The base for our PID, defaults to C</var/run/>
+
+=item I<basedir Path::Class::Dir | Str>
+
+The directory we chdir to; defaults to C</>.
+
+=item I<pidfile MooseX::Daemonize::Pid::File | Str>
+
+The file we store our PID in, defaults to C<$pidbase/$progname.pid>
+
+=item I<foreground Bool>
+
+If true, the process won't background. Useful for debugging. This option can
+be set via Getopt's -f.
+
+=item I<no_double_fork Bool>
+
+If true, the process will not perform the typical double-fork, which is extra
+added protection from your process accidentally acquiring a controlling terminal.
+More information can be found by Googling "double fork daemonize".
+
+=item I<ignore_zombies Bool>
+
+If true, the process will not clean up zombie processes.
+Normally you don't want this.
+
+=item I<dont_close_all_files Bool>
+
+If true, the objects open filehandles will not be closed when daemonized.
+Normally you don't want this.
+
+=item I<is_daemon Bool>
+
+If true, the process is the backgrounded daemon process, if false it is the
+parent process. This is useful for example in an C<after 'start' => sub { }>
+block.
+
+B<NOTE:> This option is explicitly B<not> available through L<MooseX::Getopt>.
+
+=item I<stop_timeout>
+
+Number of seconds to wait for the process to stop, before trying harder to kill
+it. Defaults to 2 seconds.
+
+=back
+
+These are the internal attributes, which are not available through MooseX::Getopt.
+
+=over 4
+
+=item I<exit_code Int>
+
+=item I<status_message Str>
+
+=back
+
+=head1 METHODS
+
+=head2 Daemon Control Methods
+
+These methods can be used to control the daemon behavior. Every effort
+has been made to have these methods DWIM (Do What I Mean), so that you
+can focus on just writing the code for your daemon.
+
+Extending these methods is best done with the L<Moose> method modifiers,
+such as C<before>, C<after> and C<around>.
+
+=over 4
+
+=item B<start>
+
+Setup a pidfile, fork, then setup the signal handlers.
+
+=item B<stop>
+
+Stop the process matching the pidfile, and unlinks the pidfile.
+
+=item B<restart>
+
+Literally this is:
+
+    $self->stop();
+    $self->start();
+
+=item B<status>
+
+=item B<shutdown>
+
+=back
+
+=head2 Pidfile Handling Methods
+
+=over 4
+
+=item B<init_pidfile>
+
+This method will create a L<MooseX::Daemonize::Pid::File> object and tell
+it to store the PID in the file C<$pidbase/$progname.pid>.
+
+=item B<check>
+
+This checks to see if the daemon process is currently running by checking
+the pidfile.
+
+=item B<get_pid>
+
+Returns the PID of the daemon process.
+
+=item B<save_pid>
+
+Write the pidfile.
+
+=item B<remove_pid>
+
+Removes the pidfile.
+
+=back
+
+=head2 Signal Handling Methods
+
+=over 4
+
+=item B<setup_signals>
+
+Setup the signal handlers, by default it only sets up handlers for SIGINT and
+SIGHUP. If you wish to add more signals just use the C<after> method modifier
+and add them.
+
+=item B<handle_sigint>
+
+Handle a INT signal, by default calls C<$self->stop()>
+
+=item B<handle_sighup>
+
+Handle a HUP signal. By default calls C<$self->restart()>
+
+=back
+
+=head2 Exit Code Methods
+
+These are overridable constant methods used for setting the exit code.
+
+=over 4
+
+=item OK
+
+Returns 0.
+
+=item ERROR
+
+Returns 1.
+
+=back
+
+=head2 Introspection
+
+=over 4
+
+=item meta()
+
+The C<meta()> method from L<Class::MOP::Class>
+
+=back
+
+=head1 DEPENDENCIES
+
+L<Moose>, L<MooseX::Getopt>, L<MooseX::Types::Path::Class> and L<POSIX>
+
+=head1 INCOMPATIBILITIES
+
+Obviously this will not work on Windows.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs or feature requests to
+C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org>.
+
+=head1 SEE ALSO
+
+L<Daemon::Control>, L<Proc::Daemon>, L<Daemon::Generic>
+
+=head1 THANKS
+
+Mike Boyko, Matt S. Trout, Stevan Little, Brandon Black, Ash Berlin and the
+#moose denizens
+
+Some bug fixes sponsored by Takkle Inc.
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Stevan Little <stevan.little@iinteractive.com>
+
+=item *
+
+Chris Prather <chris@prather.org>
+
+=back
+
+=head1 CONTRIBUTORS
+
+=for stopwords Karen Etheridge Michael Reddick Yuval Kogman Ash Berlin Brandon L Black David Steinbrunner Dave Rolsky Chisel Wright
+
+=over 4
+
+=item *
+
+Karen Etheridge <ether@cpan.org>
+
+=item *
+
+Michael Reddick <michael.reddick@gmail.com>
+
+=item *
+
+Yuval Kogman <nothingmuch@woobling.org>
+
+=item *
+
+Ash Berlin <ash@cpan.org>
+
+=item *
+
+Brandon L Black <blblack@gmail.com>
+
+=item *
+
+David Steinbrunner <dsteinbrunner@pobox.com>
+
+=item *
+
+Dave Rolsky <autarch@urth.org>
+
+=item *
+
+Chisel Wright <chisel@chizography.net>
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+This software is copyright (c) 2007 by Chris Prather.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut

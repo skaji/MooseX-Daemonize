@@ -1,6 +1,6 @@
 Revision history for MooseX-Daemonize
 
-{{$NEXT}}
+0.20      2015-08-16 03:27:34Z
     - some tooling modernization and documentation cleanup.
 
 0.19      2014-02-07 04:19:25Z
