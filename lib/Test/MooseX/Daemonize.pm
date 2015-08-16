@@ -56,7 +56,8 @@ sub check_test_output {
     }
 }
 
-package Test::MooseX::Daemonize::Testable;
+package # hide from PAUSE
+    Test::MooseX::Daemonize::Testable;
 
 use Moose::Role;
 
@@ -119,7 +120,7 @@ success and not ok on failure.
 =item B<check_test_output ( $daemon )>
 
 This is expected to be used with a C<$daemon> which does the
-B<Test::MooseX::Daemonize::Testable> role (included in this package
+B<Test::MooseX::Daemonize::Testable> role (included in this package --
 see the source for more info). It will collect the test output
 from your daemon and apply it in the parent process by mucking
 around with L<Test::Builder> stuff, again, read the source for
