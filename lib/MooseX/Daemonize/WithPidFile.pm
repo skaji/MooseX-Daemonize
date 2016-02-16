@@ -118,12 +118,6 @@ L<Moose::Role>, L<MooseX::Getopt> and L<MooseX::Daemonize::Pid::File>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (c) 2007-2011, Chris Prather C<< <perigrin@cpan.org> >>. All rights
-reserved.
-
 Portions heavily borrowed from L<Proc::Daemon> which is copyright Earl Hood.
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself. See L<perlartistic>.
 
 =cut
