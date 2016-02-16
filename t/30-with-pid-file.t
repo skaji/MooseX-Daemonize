@@ -3,7 +3,7 @@ use warnings;
 
 use File::Spec::Functions;
 
-use Test::More;
+use Test::More 0.88;
 use Test::Fatal;
 use Test::Moose;
 use File::Temp qw(tempdir);
