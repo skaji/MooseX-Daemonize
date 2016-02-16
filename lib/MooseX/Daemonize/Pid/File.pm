@@ -130,8 +130,4 @@ The C<meta()> method from L<Class::MOP::Class>
 
 =back
 
-=head1 DEPENDENCIES
-
-Obviously L<Moose>
-
 =cut

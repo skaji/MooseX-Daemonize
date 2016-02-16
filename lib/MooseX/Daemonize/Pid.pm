@@ -31,8 +31,6 @@ __END__
 
 =pod
 
-=head1 NAME
-
 =head1 DESCRIPTION
 
 This is a very basic Pid management object, it doesn't do all that
