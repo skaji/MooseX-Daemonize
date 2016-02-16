@@ -116,12 +116,6 @@ The C<meta()> method from L<Class::MOP::Class>
 
 L<Moose::Role>, L<MooseX::Getopt> and L<MooseX::Daemonize::Pid::File>
 
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =head1 COPYRIGHT AND LICENCE
 
 Copyright (c) 2007-2011, Chris Prather C<< <perigrin@cpan.org> >>. All rights

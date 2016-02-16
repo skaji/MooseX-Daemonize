@@ -134,10 +134,4 @@ The C<meta()> method from L<Class::MOP::Class>
 
 Obviously L<Moose>
 
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =cut

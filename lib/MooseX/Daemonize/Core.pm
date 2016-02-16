@@ -352,12 +352,6 @@ L<Moose::Role>, L<POSIX>
 
 =head1 INCOMPATIBILITIES
 
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =head1 SEE ALSO
 
 L<Proc::Daemon>

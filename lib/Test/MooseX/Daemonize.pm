@@ -128,12 +128,6 @@ more info. If we get time we will document this more thoroughly.
 
 =back
 
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =head1 SEE ALSO
 
 L<MooseX::Daemonize>

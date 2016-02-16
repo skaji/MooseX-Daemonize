@@ -568,12 +568,6 @@ L<Moose>, L<MooseX::Getopt>, L<MooseX::Types::Path::Class> and L<POSIX>
 
 Obviously this will not work on Windows.
 
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Daemonize@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =head1 SEE ALSO
 
 L<Daemon::Control>, L<Proc::Daemon>, L<Daemon::Generic>
