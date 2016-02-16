@@ -3,7 +3,7 @@ use warnings;
 package Test::MooseX::Daemonize;
 # ABSTRACT: Tool to help test MooseX::Daemonize applications
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 # BEGIN CARGO CULTING
 use Sub::Exporter -setup => {

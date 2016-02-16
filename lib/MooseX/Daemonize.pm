@@ -3,7 +3,7 @@ use warnings;
 package MooseX::Daemonize;
 # ABSTRACT: Role for daemonizing your Moose based application
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 use Moose::Role;
 use MooseX::Types::Path::Class;

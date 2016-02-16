@@ -3,7 +3,7 @@ use warnings;
 package MooseX::Daemonize::WithPidFile;
 # ABSTRACT: A Role with the core daemonization and pidfile management
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 use MooseX::Getopt; # to load the Getopt metaclass
 use Moose::Role;
