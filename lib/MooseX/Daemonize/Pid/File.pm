@@ -65,6 +65,7 @@ override 'is_running' => sub {
     super();
 };
 
+__PACKAGE__->meta->make_immutable;
 1;
 
 __END__

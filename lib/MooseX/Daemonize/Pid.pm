@@ -25,6 +25,7 @@ has 'pid' => (
 
 sub is_running { kill(0, (shift)->pid) ? 1 : 0 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 
 __END__
